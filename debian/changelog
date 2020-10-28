@@ -1,0 +1,19 @@
+albert (0.16.1hamonikr1) stable; urgency=low
+
+  * rebuild for hamonikr 4.0
+   - added theme for hamonikr 4.0 jin
+   - add korean application name in desktop file
+
+ -- HamoniKR <pkg@hamonikr.org>  Wed, 28 Oct 2020 16:38:31 +0900
+
+albert (0.16.1) stable; urgency=low
+
+  * version number update by debtransform
+
+ -- debtransform <build@opensuse.org>  Sat, 13 Jun 2020 13:10:17 +0000
+
+albert (0.16.1-0) stable; urgency=low
+
+  * Albert Upstream Release
+  
+ -- Manuel Schneider <manuelschneid3r@gmail.com>  Sun, 29 Oct 2017 00:00:00 +0000

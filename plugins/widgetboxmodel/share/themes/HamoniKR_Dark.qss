@@ -1,0 +1,95 @@
+/*
+ * author: Kevin Kim <root@hamonikr.org>
+ *
+ * Check http://doc.qt.io/qt-5/stylesheet-syntax.html especially the subtopics:
+ * The Style Sheet Syntax (http://doc.qt.io/qt-5/stylesheet-syntax.html)
+ * Qt Style Sheets Reference (http://doc.qt.io/qt-5/stylesheet-reference.html)
+ */
+
+* {
+	font-family: "Open Sans";
+	src: url("//fonts.googleapis.com/css?family=Open+Sans");
+	font-weight: 400;
+	
+    border: none;
+    color : #828282;
+    background-color: #BF252525;
+}
+
+#frame {
+    padding: 2px 15px;
+    border-radius: 15px;
+    background-color: #BF252525;
+    min-width:700px;
+    max-width:700px;
+}
+
+#inputLine {
+    padding: 2px 15px;
+    font-size: 30px;
+    selection-color: #030303;
+    selection-background-color: #808080;
+    background-color: transparent;
+}
+
+#settingsButton {
+    margin: 6px 6px 0px 0px;
+    color: #BF252525;
+    background-color: transparent;
+    padding: 2px;
+    min-width:15px;
+    min-height:15px;
+    max-width:15px;
+    max-height:15px;
+}
+
+/********** ListViews ************/
+
+QListView {
+    background: transparent;
+    selection-color: #ffffff;
+    padding: 5px 5px 5px 5px;
+}
+
+QListView::item:selected {
+    background: #0767c8;
+    border-radius: 10px;
+}
+
+QListView QScrollBar:vertical  {
+    width: 2px;
+    background: #000000;
+}
+
+QListView QScrollBar::handle:vertical  {
+    background: #BF808080;
+    border-radius: 3px;
+    min-height: 100px;
+}
+
+QListView QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical,
+QListView QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical,
+QListView QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    border: 0px;
+    width: 0px;
+    height: 0px;
+    background: #BF252525;
+}
+
+/********** resultsList **********/
+
+QListView#resultsList {
+    icon-size: 40px;
+    font-size: 20px;
+    padding: 5px 5px 5px 5px;
+}
+
+QListView#resultsList::item{
+    padding: 8px 20px 20px 0px;
+}
+
+/********** actionList **********/
+
+QListView#actionList {
+    font-size: 20px;
+}

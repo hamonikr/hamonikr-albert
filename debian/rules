@@ -1,0 +1,17 @@
+#!/usr/bin/make -f
+CODENAME = $(shell lsb_release -cs)
+export DH_VERBOSE = 1
+#export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+#export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic
+#export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+ifneq (, $(findstring ${CODENAME},"xenial" "yakkety" "zesty" "stretch"))
+	dh_auto_configure -- -DBUILD_WITH_QTCHARTS=OFF
+else
+	dh_auto_configure --
+endif

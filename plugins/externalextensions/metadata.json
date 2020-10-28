@@ -1,0 +1,10 @@
+{
+    "id" :              "org.albert.extension.externalextensions",
+    "name" :            "External extensions",
+    "version" :         "0.3",
+    "platform" :        "All",
+    "group" :           "Extensions",
+    "author" :          "Manuel Schneider",
+    "dependencies" :    [],
+    "enabledbydefault":    false
+}

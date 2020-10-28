@@ -1,0 +1,21 @@
+- title: User guide
+  docs:
+    - installing
+    - using
+    - extending
+    - extensions
+    - faq
+
+#- title: Dev guide
+#  docs:
+#    - extending/native
+#    - extending/external
+#    - extending/python
+#    - extending/javascript
+#    - extending/lua
+
+- title: Meta
+  docs:
+  - contributing
+  - donation
+  - changelog
