@@ -1,0 +1,12 @@
+# 필요한 패키지를 먼저 설치합니다.
+sudo apt-get install -y libqt5charts5-dev devscripts equivs debhelper
+
+# 빌드 의존 패키지 설치
+sudo mk-build-deps --install debian/control
+
+# 빌드
+dpkg-buildpackage -T clean
+dpkg-buildpackage --sign-key=9FA298A1E42665B8
+
+# 설치 확인
+sudo dpkg -i ../*.deb
