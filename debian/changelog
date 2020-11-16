@@ -1,3 +1,10 @@
+albert (0.16.1hamonikr2) stable; urgency=low
+
+  * Update plugins/widgetboxmodel/share/themes/HamoniKR_Dark.qss
+   - Fixed theme padding size for HamoniKR
+
+ -- HamoniKR <pkg@hamonikr.org>  Mon, 16 Nov 2020 15:10:57 +0900
+
 albert (0.16.1hamonikr1) stable; urgency=low
 
   * rebuild for hamonikr 4.0

@@ -15,3 +15,5 @@ ifneq (, $(findstring ${CODENAME},"xenial" "yakkety" "zesty" "stretch"))
 else
 	dh_auto_configure --
 endif
+
+override_dh_usrlocal:
