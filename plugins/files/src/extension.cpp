@@ -1,6 +1,5 @@
 // Copyright (C) 2014-2018 Manuel Schneider
 
-#include <QDebug>
 #include <QDir>
 #include <QDirIterator>
 #include <QFutureWatcher>
@@ -25,6 +24,11 @@
 #include "albert/util/standarditem.h"
 #include "albert/util/standardactions.h"
 #include "xdg/iconlookup.h"
+Q_LOGGING_CATEGORY(qlc, "applications")
+#define DEBG qCDebug(qlc,).noquote()
+#define INFO qCInfo(qlc,).noquote()
+#define WARN qCWarning(qlc,).noquote()
+#define CRIT qCCritical(qlc,).noquote()
 using namespace Core;
 using namespace std;
 
@@ -52,7 +56,7 @@ public:
         : offlineIndex(offlineIndex) { }
 
     void visit(Files::IndexTreeNode *node) override {
-        for ( const shared_ptr<Files::File> &item : node->items() )
+        for ( const auto &item : node->items() )
             offlineIndex.add(item);
     }
 };
@@ -123,7 +127,7 @@ void Files::Private::startIndexing() {
         indexIntervalTimer.start();
 
     // Run the indexer thread
-    qInfo() << "Start indexing files.";
+    INFO << "Start indexing files.";
     futureWatcher->setFuture(QtConcurrent::run(this, &Private::indexFiles));
 
     // Notification
@@ -147,7 +151,7 @@ void Files::Private::finishIndexing() {
         CounterVisitor counterVisitor;
         for (const auto & tree : indexTrees )
             tree->accept(counterVisitor);
-        qInfo() << qPrintable(QString("Indexed %1 files in %2 directories.")
+        INFO << qPrintable(QString("Indexed %1 files in %2 directories.")
                               .arg(counterVisitor.itemCount).arg(counterVisitor.dirCount));
         emit q->statusInfo(QString("Indexed %1 files in %2 directories.")
                            .arg(counterVisitor.itemCount).arg(counterVisitor.dirCount));
@@ -199,7 +203,7 @@ OfflineIndex* Files::Private::indexFiles() {
     }
 
     // Serialize data
-    qDebug() << "Serializing files…";
+    DEBG << "Serializing files…";
     emit q->statusInfo("Serializing index data…");
     QFile file(q->cacheLocation().filePath("fileindex.json"));
     if (file.open(QIODevice::WriteOnly)) {
@@ -211,11 +215,11 @@ OfflineIndex* Files::Private::indexFiles() {
         file.close();
     }
     else
-        qWarning() << "Couldn't write to file:" << file.fileName();
+        WARN << "Couldn't write to file:" << file.fileName();
 
 
     // Build offline index
-    qDebug() << "Building inverted file index…";
+    DEBG << "Building inverted file index…";
     emit q->statusInfo("Building inverted index…");
     Core::OfflineIndex *offline = new Core::OfflineIndex(indexSettings.fuzzy());
     OfflineIndexBuilderVisitor visitor(*offline);
@@ -255,7 +259,7 @@ Files::Extension::Extension()
     });
 
     // Deserialize data
-    qDebug() << "Loading file index from cache.";
+    DEBG << "Loading file index from cache.";
     QFile file(cacheLocation().filePath("fileindex.json"));
     if ( file.exists() ) {
         if (file.open(QIODevice::ReadOnly)) {
@@ -267,13 +271,13 @@ Files::Extension::Extension()
             file.close();
 
             // Build offline index
-            qDebug() << "Building inverted file index.";
+            DEBG << "Building inverted file index.";
             OfflineIndexBuilderVisitor visitor(d->offlineIndex);
             for (auto& tree : d->indexTrees)
                 tree->accept(visitor);
         }
         else
-            qWarning() << "Could not read from file: " << file.fileName();
+            WARN << "Could not read from file: " << file.fileName();
     }
 
     // Trigger an initial update
@@ -324,7 +328,7 @@ void Files::Extension::handleQuery(Core::Query * query) const {
             QDir dir(pathInfo.filePath());
             QString commonPrefix;
             QString queryFileName = queryFileInfo.fileName();
-            vector<shared_ptr<StandardItem>> items;
+            vector<pair<shared_ptr<StandardItem>,uint>> results;
 
             for (const QFileInfo& fileInfo : dir.entryInfoList(QDir::AllEntries|QDir::Hidden|QDir::NoDotAndDotDot,
                                                                QDir::DirsFirst|QDir::Name|QDir::IgnoreCase) ) {
@@ -347,18 +351,23 @@ void Files::Extension::handleQuery(Core::Query * query) const {
                     if (icon.isEmpty())
                         icon = (mimetype.iconName() == "inode-directory") ? ":directory" : ":unknown";
 
-                    auto item = make_shared<StandardItem>(fileInfo.filePath(),
-                                                          icon,
-                                                          fileName,
-                                                          fileInfo.filePath());
-                    item->setActions(File::buildFileActions(fileInfo.filePath()));
-                    items.push_back(move(item));
+                    results.emplace_back(makeStdItem(
+                        fileInfo.filePath(),
+                        icon,
+                        fileName,
+                        fileInfo.filePath(),
+                        File::buildFileActions(fileInfo.filePath()),
+                        fileInfo.filePath()
+                    ), 0);
                 }
             }
-            for (auto &item : items) {
-                item->setCompletion(dir.filePath(commonPrefix));
-                query->addMatch(std::move(item));
-            }
+
+            if (!commonPrefix.isEmpty())
+                for (auto &item : results)
+                    item.first->setCompletion(dir.filePath(commonPrefix));
+
+            query->addMatches(make_move_iterator(results.begin()),
+                              make_move_iterator(results.end()));
         }
     }
     else
@@ -368,15 +377,13 @@ void Files::Extension::handleQuery(Core::Query * query) const {
 
         if ( QString("albert scan files").startsWith(query->string()) ) {
 
-            auto item = make_shared<StandardItem>("files.action.index");
-            item->setText("albert scan files");
-            item->setSubtext("Update the file index");
-            item->setIconPath(":app_icon");
-            // Const cast is fine since the action will not be called here
-            item->addAction(make_shared<FuncAction>("Update the file index",
-                                                    [this](){ const_cast<Extension*>(this)->updateIndex();}));
-
-            query->addMatch(move(item));
+            query->addMatch(makeStdItem("files.action.index",
+                "app_icon", "albert scan files", "Update the file index", //Const cast is fine since the action will not be called here
+                ActionList { makeFuncAction(
+                    "Update the file index",
+                    [this](){ const_cast<Extension*>(this)->updateIndex();})}
+                )
+            );
         }
 
         // Search for matches
@@ -417,17 +424,17 @@ void Files::Extension::setPaths(const QStringList &paths) {
         QString absPath = fileInfo.absoluteFilePath();
 
         if (d->indexRootDirs.contains(absPath)) {
-            qWarning() << QString("Duplicate paths: %1.").arg(path);
+            WARN << QString("Duplicate paths: %1.").arg(path);
             continue;
         }
 
         if (!fileInfo.exists()) {
-            qWarning() << QString("Path does not exist: %1.").arg(path);
+            WARN << QString("Path does not exist: %1.").arg(path);
             continue;
         }
 
         if(!fileInfo.isDir()) {
-            qWarning() << QString("Path is not a directory: %1.").arg(path);
+            WARN << QString("Path is not a directory: %1.").arg(path);
             continue;
         }
 

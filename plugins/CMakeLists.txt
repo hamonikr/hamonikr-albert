@@ -33,12 +33,7 @@ endif()
 
 option(BUILD_CHROMEBOOKMARKS "Build the extension" ON)
 if (BUILD_CHROMEBOOKMARKS)
-    add_subdirectory(chromebookmarks)
-endif()
-
-option(BUILD_EXTERNALEXTENSIONS "Build the extension" ON)
-if (BUILD_EXTERNALEXTENSIONS)
-    add_subdirectory(externalextensions)
+    add_subdirectory(chromium)
 endif()
 
 option(BUILD_DEBUG "Build the extension" OFF)
@@ -46,7 +41,7 @@ if (BUILD_DEBUG)
     add_subdirectory(debug)
 endif()
 
-option(BUILD_FILES "Build the extension" ON)  # Deprecated
+option(BUILD_FILES "Build the extension" ON)
 if (BUILD_FILES)
     add_subdirectory(files)
 endif()

@@ -1,0 +1,22 @@
+{
+	"BUILD_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/terminal/terminal_autogen",
+	"CMAKE_BINARY_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build",
+	"CMAKE_CURRENT_BINARY_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/terminal",
+	"CMAKE_CURRENT_SOURCE_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/terminal",
+	"CMAKE_SOURCE_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2",
+	"INCLUDE_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/terminal/terminal_autogen/include",
+	"INPUTS" : 
+	[
+		"/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/terminal/resources/terminal.svg"
+	],
+	"LOCK_FILE" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/terminal/CMakeFiles/terminal_autogen.dir/AutoRcc_terminal_EWIEGA46WW_Lock.lock",
+	"MULTI_CONFIG" : false,
+	"OPTIONS" : [ "-name", "terminal" ],
+	"OUTPUT_CHECKSUM" : "EWIEGA46WW",
+	"OUTPUT_NAME" : "qrc_terminal.cpp",
+	"RCC_EXECUTABLE" : "/usr/lib/qt5/bin/rcc",
+	"RCC_LIST_OPTIONS" : [ "--list" ],
+	"SETTINGS_FILE" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/terminal/CMakeFiles/terminal_autogen.dir/AutoRcc_terminal_EWIEGA46WW_Used.txt",
+	"SOURCE" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/terminal/terminal.qrc",
+	"VERBOSITY" : 0
+}

@@ -1,0 +1,22 @@
+{
+	"BUILD_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/firefoxbookmarks/firefoxbookmarks_autogen",
+	"CMAKE_BINARY_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build",
+	"CMAKE_CURRENT_BINARY_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/firefoxbookmarks",
+	"CMAKE_CURRENT_SOURCE_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/firefoxbookmarks",
+	"CMAKE_SOURCE_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2",
+	"INCLUDE_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/firefoxbookmarks/firefoxbookmarks_autogen/include",
+	"INPUTS" : 
+	[
+		"/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/firefoxbookmarks/resources/favicon.png"
+	],
+	"LOCK_FILE" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/firefoxbookmarks/CMakeFiles/firefoxbookmarks_autogen.dir/AutoRcc_firefoxbookmarks_EWIEGA46WW_Lock.lock",
+	"MULTI_CONFIG" : false,
+	"OPTIONS" : [ "-name", "firefoxbookmarks" ],
+	"OUTPUT_CHECKSUM" : "EWIEGA46WW",
+	"OUTPUT_NAME" : "qrc_firefoxbookmarks.cpp",
+	"RCC_EXECUTABLE" : "/usr/lib/qt5/bin/rcc",
+	"RCC_LIST_OPTIONS" : [ "--list" ],
+	"SETTINGS_FILE" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/firefoxbookmarks/CMakeFiles/firefoxbookmarks_autogen.dir/AutoRcc_firefoxbookmarks_EWIEGA46WW_Used.txt",
+	"SOURCE" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/firefoxbookmarks/firefoxbookmarks.qrc",
+	"VERBOSITY" : 0
+}

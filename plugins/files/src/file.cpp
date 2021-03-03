@@ -1,6 +1,5 @@
 // Copyright (C) 2014-2018 Manuel Schneider
 
-#include "file.h"
 #include <QApplication>
 #include <QClipboard>
 #include <QDesktopServices>
@@ -9,11 +8,11 @@
 #include <QMimeData>
 #include <QProcess>
 #include <QUrl>
-#include "xdg/iconlookup.h"
 #include "albert/util/standardactions.h"
+#include "file.h"
+#include "xdg/iconlookup.h"
 using namespace std;
 using namespace Core;
-extern QString terminalCommand;
 
 
 /** ***************************************************************************/
@@ -38,7 +37,7 @@ QString Files::File::subtext() const {
 QString Files::File::completion() const {
     const QString &path = filePath();
     QString result = ( QFileInfo(path).isDir() ) ? QString("%1/").arg(path) : path;
-#ifdef __linux__
+#ifdef __unix__
     if ( result.startsWith(QDir::homePath()) )
         result.replace(QDir::homePath(), "~");
 #endif
@@ -67,27 +66,24 @@ std::vector<std::shared_ptr<Action> > Files::File::buildFileActions(const QStrin
 {
     vector<shared_ptr<Action>> actions;
 
-    actions.push_back(make_shared<UrlAction>("Open with default application",
-                                             QUrl::fromLocalFile(filePath)));
+    actions.push_back(makeUrlAction("Open with default application",
+                                    QUrl::fromLocalFile(filePath)));
 
     QFileInfo fileInfo(filePath);
+
     if ( fileInfo.isFile() && fileInfo.isExecutable() )
-        actions.push_back(make_shared<ProcAction>("Execute file", QStringList{filePath}));
+        actions.push_back(makeProcAction("Execute file", QStringList{filePath}));
 
 
-    actions.push_back(make_shared<UrlAction>("Reveal in file browser",
-                                             QUrl::fromLocalFile(QFileInfo(filePath).path())));
+    actions.push_back(makeUrlAction("Reveal in file browser",
+                                    QUrl::fromLocalFile(fileInfo.path())));
 
+    // Let standard shell handle flow control (syntax differs in shells, e.g. fish)
+    actions.push_back(makeTermAction("Open terminal here", "", TermAction::DoNotClose,
+                                     fileInfo.isDir() ? fileInfo.filePath() : fileInfo.path()));
 
-    actions.push_back(make_shared<FuncAction>("Open terminal at this path", [filePath](){
-        QFileInfo fileInfo(filePath);
-        QStringList commandLine = terminalCommand.trimmed().split(' ');
-        if ( commandLine.size() == 0 )
-            return;
-        QProcess::startDetached(commandLine[0], {}, fileInfo.isDir() ? fileInfo.filePath() : fileInfo.path());
-    }));
+    actions.push_back(makeFuncAction("Copy file to clipboard", [filePath](){
 
-    actions.push_back(make_shared<FuncAction>("Copy file to clipboard", [filePath](){
         //  Get clipboard
         QClipboard *cb = QApplication::clipboard();
 
@@ -113,7 +109,7 @@ std::vector<std::shared_ptr<Action> > Files::File::buildFileActions(const QStrin
         cb->setMimeData(newMimeData);
     }));
 
-    actions.push_back(make_shared<ClipAction>("Copy path to clipboard", filePath));
+    actions.push_back(makeClipAction("Copy path to clipboard", filePath));
 
     return actions;
 

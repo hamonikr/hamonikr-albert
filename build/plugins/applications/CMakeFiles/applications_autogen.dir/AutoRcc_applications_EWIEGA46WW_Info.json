@@ -1,0 +1,22 @@
+{
+	"BUILD_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/applications/applications_autogen",
+	"CMAKE_BINARY_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build",
+	"CMAKE_CURRENT_BINARY_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/applications",
+	"CMAKE_CURRENT_SOURCE_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/applications",
+	"CMAKE_SOURCE_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2",
+	"INCLUDE_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/applications/applications_autogen/include",
+	"INPUTS" : 
+	[
+		"/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/applications/resources/application-x-executable.svg"
+	],
+	"LOCK_FILE" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/applications/CMakeFiles/applications_autogen.dir/AutoRcc_applications_EWIEGA46WW_Lock.lock",
+	"MULTI_CONFIG" : false,
+	"OPTIONS" : [ "-name", "applications" ],
+	"OUTPUT_CHECKSUM" : "EWIEGA46WW",
+	"OUTPUT_NAME" : "qrc_applications.cpp",
+	"RCC_EXECUTABLE" : "/usr/lib/qt5/bin/rcc",
+	"RCC_LIST_OPTIONS" : [ "--list" ],
+	"SETTINGS_FILE" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/applications/CMakeFiles/applications_autogen.dir/AutoRcc_applications_EWIEGA46WW_Used.txt",
+	"SOURCE" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/applications/applications.qrc",
+	"VERBOSITY" : 0
+}

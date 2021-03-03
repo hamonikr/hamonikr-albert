@@ -1,0 +1,15 @@
+[Desktop Entry]
+Name=Albert
+GenericName=Launcher
+Comment=system launcher
+Categories=Utility;
+Type=Application
+Exec=albert
+Icon=albert
+Terminal=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Hidden=false
+Name[ko_KR]=런처
+Comment[ko_KR]=시스템 런처
+X-GNOME-Autostart-Delay=0

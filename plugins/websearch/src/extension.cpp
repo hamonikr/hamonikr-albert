@@ -1,6 +1,5 @@
-// Copyright (C) 2014-2018 Manuel Schneider
+// Copyright (C) 2014-2020 Manuel Schneider
 
-#include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
 #include <QFile>
@@ -13,14 +12,19 @@
 #include <QUrl>
 #include <array>
 #include <map>
-#include <vector>
 #include <string>
+#include <vector>
+#include "albert/util/standardactions.h"
+#include "albert/util/standarditem.h"
 #include "configwidget.h"
 #include "enginesmodel.h"
 #include "extension.h"
-#include "albert/util/standardactions.h"
-#include "albert/util/standarditem.h"
 #include "xdg/iconlookup.h"
+Q_LOGGING_CATEGORY(qlc, "websearch")
+#define DEBG qCDebug(qlc,).noquote()
+#define INFO qCInfo(qlc,).noquote()
+#define WARN qCWarning(qlc,).noquote()
+#define CRIT qCCritical(qlc,).noquote()
 using namespace Core;
 using namespace std;
 
@@ -29,6 +33,7 @@ namespace {
 
 vector<Websearch::SearchEngine> defaultSearchEngines = {
     {"Google",        "gg ",  ":google",    "https://www.google.com/search?q=%s"},
+    {"Naver",         "nv ",  ":naver",     "https://search.naver.com/search.naver?&query=%s"},
     {"Youtube",       "yt ",  ":youtube",   "https://www.youtube.com/results?search_query=%s"},
     {"Amazon",        "ama ", ":amazon",    "http://www.amazon.com/s/?field-keywords=%s"},
     {"Ebay",          "eb ",  ":ebay",      "http://www.ebay.com/sch/i.html?_nkw=%s"},
@@ -43,14 +48,12 @@ shared_ptr<Core::Item> buildWebsearchItem(const Websearch::SearchEngine &se, con
     QUrl url = QUrl(urlString);
     QString desc = QString("Start %1 search in your browser").arg(se.name);
 
-    auto item = make_shared<StandardItem>(se.name);
-    item->setText(se.name);
-    item->setSubtext(desc);
-    item->setIconPath(se.iconPath);
-    item->setCompletion(QString("%1%2").arg(se.trigger, searchterm));
-    item->addAction(make_shared<UrlAction>("Open URL", url));
-
-    return item;
+    return makeStdItem(se.name,
+                       se.iconPath,
+                       se.name,
+                       desc,
+                       ActionList{ makeUrlAction("Open URL", url) },
+                       QString("%1%2").arg(se.trigger, searchterm));
 }
 
 static constexpr const char * ENGINES_FILE_NAME = "engines.json";
@@ -109,7 +112,7 @@ Websearch::Extension::Extension()
             d->searchEngines.push_back(searchEngine);
         }
     } else {
-        qWarning() << qPrintable(QString("Could not load from file: '%1'.").arg(enginesJson));
+        WARN << qPrintable(QString("Could not load from file: '%1'.").arg(enginesJson));
         setEngines(defaultSearchEngines);
     }
 }
@@ -159,15 +162,15 @@ void Websearch::Extension::handleQuery(Core::Query * query) const {
                                 query->string().startsWith("https://") ||  // explict scheme
                                 ( QRegularExpression(R"R(\S+\.\S+$)R").match(url.host()).hasMatch() &&
                                   !url.topLevelDomain().isNull()) ) ) {  // valid TLD
-            auto item = make_shared<StandardItem>("valid_url");
-            item->setText(QString("Open url in browser"));
-            item->setSubtext(QString("Visit %1").arg(url.authority()));
-            item->setCompletion(query->string());
-            QString icon = XDG::IconLookup::iconPath({"www", "web-browser", "emblem-web"});
-            item->setIconPath(icon.isNull() ? ":favicon" : icon);
-            item->addAction(make_shared<UrlAction>("Open URL", url));
 
-            query->addMatch(move(item), UINT_MAX);
+            QString icon = XDG::IconLookup::iconPath({"www", "web-browser", "emblem-web"});
+
+            query->addMatch(makeStdItem("valid_url",
+                                        icon.isNull() ? ":default" : icon,
+                                        "Open url in browser",
+                                        QString("Visit %1").arg(url.authority()),
+                                        ActionList{ makeUrlAction("Open URL", url) }
+                                        ), UINT_MAX);
         }
     }
 }
@@ -210,7 +213,7 @@ void Websearch::Extension::setEngines(const vector<Websearch::SearchEngine> &eng
         }
         file.write(QJsonDocument(array).toJson());
     } else
-        qCritical() << qPrintable(QString("Could not write to file: '%1'.").arg(file.fileName()));
+        CRIT << qPrintable(QString("Could not write to file: '%1'.").arg(file.fileName()));
 }
 
 

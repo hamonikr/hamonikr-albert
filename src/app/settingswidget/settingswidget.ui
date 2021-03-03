@@ -185,32 +185,6 @@
               </property>
              </widget>
             </item>
-            <item row="8" column="0">
-             <widget class="QLabel" name="label_clear_history">
-              <property name="text">
-               <string>&amp;Clear history:</string>
-              </property>
-              <property name="buddy">
-               <cstring>pushButton_clearHistory</cstring>
-              </property>
-             </widget>
-            </item>
-            <item row="8" column="1">
-             <widget class="QPushButton" name="pushButton_clearHistory">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clears the history database. Note that this will reset your sort order of recently used items too.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-              <property name="text">
-               <string>Clear</string>
-              </property>
-             </widget>
-            </item>
             <item row="6" column="0">
              <widget class="QLabel" name="label_autostart">
               <property name="text">
@@ -229,22 +203,28 @@
              </widget>
             </item>
             <item row="7" column="0">
-             <widget class="QLabel" name="label_telemetry">
+             <widget class="QLabel" name="label_clear_history">
               <property name="text">
-               <string>Send telemetry:</string>
+               <string>&amp;Clear history:</string>
               </property>
               <property name="buddy">
-               <cstring>checkBox_telemetry</cstring>
+               <cstring>pushButton_clearHistory</cstring>
               </property>
              </widget>
             </item>
             <item row="7" column="1">
-             <widget class="QCheckBox" name="checkBox_telemetry">
+             <widget class="QPushButton" name="pushButton_clearHistory">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this option is enabled albert reports anonymous data.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clears the history database. Note that this will reset your sort order of recently used items too.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
-               <string/>
+               <string>Clear</string>
               </property>
              </widget>
             </item>
@@ -391,8 +371,8 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; font-size:10pt; font-weight:200; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:16px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:x-large; font-weight:600;&quot;&gt;Albert launcher ___versionstring___&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;If you encounter bugs or think you have suggestions for improvement, tell me at &lt;a href=&quot;https://github.com/albertlauncher/albert/issues&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#00cccc;&quot;&gt;GitHub&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;If you really like this software please consider a &lt;a href=&quot;https://albertlauncher.github.io/docs/donation/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#00cccc;&quot;&gt;donation&lt;/span&gt;&lt;/a&gt; or become a &lt;a href=&quot;https://www.patreon.com/albertlauncher&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#00cccc;&quot;&gt;patron&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;I'd like to thank all &lt;a href=&quot;https://github.com/albertlauncher/albert/graphs/contributors&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#00cccc;&quot;&gt;contributors&lt;/span&gt;&lt;/a&gt;, &lt;a href=&quot;https://albertlauncher.github.io/docs/supporters/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#00cccc;&quot;&gt;supporters&lt;/span&gt;&lt;/a&gt; and users. You keep this project going on.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;If you really like this software please consider a &lt;a href=&quot;https://albertlauncher.github.io/donation/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#00cccc;&quot;&gt;donation&lt;/span&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;I'd like to thank all &lt;a href=&quot;https://github.com/albertlauncher/albert/graphs/contributors&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#00cccc;&quot;&gt;contributors&lt;/span&gt;&lt;/a&gt;, &lt;a href=&quot;https://albertlauncher.github.io/supporters/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#00cccc;&quot;&gt;supporters&lt;/span&gt;&lt;/a&gt; and users. You keep this project going on.&lt;/p&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#808080;&quot;&gt;___buildinfo___&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="alignment">
@@ -440,6 +420,7 @@ p, li { white-space: pre-wrap; }
   <tabstop>lineEdit_term</tabstop>
   <tabstop>checkBox_showTray</tabstop>
   <tabstop>checkBox_incrementalSort</tabstop>
+  <tabstop>checkBox_autostart</tabstop>
   <tabstop>pushButton_clearHistory</tabstop>
   <tabstop>listView_plugins</tabstop>
  </tabstops>

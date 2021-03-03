@@ -9,7 +9,7 @@
 #include <QString>
 #include "themefileparser.h"
 #include "iconlookup.h"
-
+using namespace std;
 
 namespace  {
     QStringList icon_extensions = {"png", "svg", "xpm"};
@@ -17,22 +17,19 @@ namespace  {
 
 
 /** ***************************************************************************/
-QString XDG::IconLookup::iconPath(QString iconName, QString themeName){
-    return instance()->themeIconPath(iconName, themeName);
-}
-
-
-
-/** ***************************************************************************/
-QString XDG::IconLookup::iconPath(std::initializer_list<QString> iconNames, QString themeName) {
-    for ( const QString &iconName : iconNames ) {
-        QString result = instance()->themeIconPath(iconName, themeName);
-        if ( !result.isEmpty() )
+QString XDG::IconLookup::iconPath(QStringList iconNames, QString themeName) {
+    QString result;
+    for ( const QString &iconName : iconNames )
+        if ( !(result = instance()->themeIconPath(iconName, themeName)).isNull() )
             return result;
-    }
     return QString();
 }
 
+
+/** ***************************************************************************/
+QString XDG::IconLookup::iconPath(QString iconName, QString themeName){
+    return instance()->themeIconPath(iconName, themeName);
+}
 
 
 /** ***************************************************************************/
@@ -48,11 +45,9 @@ XDG::IconLookup::IconLookup()
     if (QFile::exists(path))
         iconDirs_.append(path);
 
-    for (const QString &basedir : QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)){
-        path = QDir(basedir).filePath("icons");
-        if (QFile::exists(path))
+    for (const QString &basedir : QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation))
+        if (QFile::exists(path = QDir(basedir).filePath("icons")))
             iconDirs_.append(path);
-    }
 
     path = "/usr/share/pixmaps";
     if (QFile::exists(path))
@@ -77,6 +72,9 @@ XDG::IconLookup *XDG::IconLookup::instance()
 /** ***************************************************************************/
 QString XDG::IconLookup::themeIconPath(QString iconName, QString themeName){
 
+    if (themeName.isEmpty())
+        themeName = QIcon::themeName();
+
     // if we have an absolute path, just return it
     if ( iconName[0]=='/' ){
         if ( QFile::exists(iconName) )
@@ -91,40 +89,30 @@ QString XDG::IconLookup::themeIconPath(QString iconName, QString themeName){
             iconName.chop(4);
 
     // Check cache
-    QString iconPath = iconCache_.value(iconName);
-    if (!iconPath.isNull())
-        return iconPath;
+    try {
+        return iconCache_.at(iconName);
+    }  catch (out_of_range) { }
+
+    QStringList checkedThemes;
+    QString iconPath;
 
     // Lookup themefile
-    QStringList checkedThemes;
-    iconPath = doRecursiveIconLookup(iconName, themeName, &checkedThemes);
-    if (!iconPath.isNull()){
-        iconCache_.insert(iconName, iconPath);
-        return iconPath;
-    }
+    if (!(iconPath = doRecursiveIconLookup(iconName, themeName, &checkedThemes)).isNull())
+        return iconCache_.emplace(iconName, iconPath).first->second;
 
     // Lookup in hicolor
-    if (!checkedThemes.contains("hicolor")){
-        iconPath = doRecursiveIconLookup(iconName, "hicolor", &checkedThemes);
-        if (!iconPath.isNull()){
-            iconCache_.insert(iconName, iconPath);
-            return iconPath;
-        }
-    }
+    if (!checkedThemes.contains("hicolor"))
+        if (!(iconPath = doRecursiveIconLookup(iconName, "hicolor", &checkedThemes)).isNull())
+            return iconCache_.emplace(iconName, iconPath).first->second;
 
     // Now search unsorted
-    for (const QString &iconDir : iconDirs_){
-        for (const QString &ext : icon_extensions){
-            QString filename = QString("%1/%2.%3").arg(iconDir, iconName, ext);
-            if (QFile(filename).exists()){
-                iconCache_.insert(iconName, filename);
-                return filename;
-            }
-        }
-    }
+    for (const QString &iconDir : iconDirs_)
+        for (const QString &ext : icon_extensions)
+            if (QFile(iconPath = QString("%1/%2.%3").arg(iconDir, iconName, ext)).exists())
+                return iconCache_.emplace(iconName, iconPath).first->second;
 
     // Nothing found, save though to avoid repeated expensive lookups
-    return iconCache_.insert(iconName, QString("")).value();
+    return iconCache_.emplace(iconName, QString()).first->second;
 }
 
 
@@ -168,13 +156,13 @@ QString XDG::IconLookup::doIconLookup(const QString &iconName, const QString &th
     QString themeName = themeDir.dirName();
 
     // Get the sizes of the dirs
-    std::vector<std::pair<QString, int>> dirsAndSizes;
+    vector<pair<QString, int>> dirsAndSizes;
     for (const QString &subdir : themeFileParser.directories())
-        dirsAndSizes.push_back(std::make_pair(subdir, themeFileParser.size(subdir)));
+        dirsAndSizes.push_back(make_pair(subdir, themeFileParser.size(subdir)));
 
     // Sort them by size
-    std::sort(dirsAndSizes.begin(), dirsAndSizes.end(),
-              [](std::pair<QString, int>  a, std::pair<QString, int> b) {
+    sort(dirsAndSizes.begin(), dirsAndSizes.end(),
+              [](pair<QString, int>  a, pair<QString, int> b) {
                   return a.second > b.second;
               });
 

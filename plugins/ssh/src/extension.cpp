@@ -1,28 +1,31 @@
-// Copyright (C) 2014-2018 Manuel Schneider
+// Copyright (C) 2014-2020 Manuel Schneider
 
-#include <QDebug>
-#include <QFileSystemWatcher>
-#include <QFile>
 #include <QDir>
+#include <QFile>
+#include <QFileSystemWatcher>
 #include <QPointer>
+#include <QLoggingCategory>
 #include <QProcess>
 #include <QRegularExpression>
 #include <QSettings>
 #include <QStandardPaths>
 #include <QString>
+#include <QTextStream>
 #include <memory>
-#include <stdexcept>
 #include <set>
-#include "extension.h"
-#include "configwidget.h"
+#include <stdexcept>
 #include "albert/util/standardactions.h"
 #include "albert/util/standarditem.h"
-#include "albert/util/shutil.h"
+#include "configwidget.h"
+#include "extension.h"
 #include "xdg/iconlookup.h"
+Q_LOGGING_CATEGORY(qlc, "ssh")
+#define DEBG qCDebug(qlc,).noquote()
+#define INFO qCInfo(qlc,).noquote()
+#define WARN qCWarning(qlc,).noquote()
+#define CRIT qCCritical(qlc,).noquote()
 using namespace std;
 using namespace Core;
-
-extern QString terminalCommand;
 
 namespace {
 const char* CFG_USE_KNOWN_HOSTS = "use_known_hosts";
@@ -59,9 +62,8 @@ Ssh::Extension::Extension()
         throw QString("[%s] ssh not found.").arg(Plugin::id());
 
     // Find an appropriate icon
-    d->icon = XDG::IconLookup::iconPath({"ssh", "terminal"});
-    if (d->icon.isEmpty())
-        d->icon = ":ssh"; // Fallback
+    if ((d->icon = XDG::IconLookup::iconPath({"ssh", "terminal"})).isNull())
+        d->icon = ":ssh";
 
     rescan();
 }
@@ -107,22 +109,19 @@ void Ssh::Extension::handleQuery(Query * query) const {
 
                 QString target = port.isEmpty() ? host : QString("[%1]:%2").arg(host, port);
 
-                auto item = std::make_shared<StandardItem>("ssh_" + target);
-                item->setText(target);
-                item->setSubtext(QString("Connect to '%1'").arg(target));
-                item->setCompletion(QString("ssh %1").arg(target));
-                item->setIconPath(d->icon);
-                item->addAction(make_shared<TermAction>(QString("Connect to '%1'").arg(target),
-                                                        QStringList{"ssh", target}));
-
-                query->addMatch(std::move(item));
+                query->addMatch(makeStdItem("ssh_" + target,
+                    d->icon, target, QString("Connect to '%1'").arg(target),
+                    ActionList{
+                        makeTermAction(QString("Connect to '%1'").arg(target),QStringList{"ssh", target})
+                    }
+                ));
             }
         }
     }
     else
     {
         // Check sanity of input
-        QRegularExpression re(R"raw(^(?:(\w+)@)?\[?((?:\w[\w:]*|[\w\.]*))\]?(?::(\d+))?$)raw");
+        QRegularExpression re(R"raw(^(?:(\w+)@)?\[?((?:\w[\w:-]*|[\w\.-]*))\]?(?::(\d+))?$)raw");
         QRegularExpressionMatch match = re.match(trimmed);
 
         if (match.hasMatch())
@@ -139,9 +138,6 @@ void Ssh::Extension::handleQuery(Query * query) const {
 
                 if (host.startsWith(q_host, Qt::CaseInsensitive))
                 {
-                    auto item = std::make_shared<StandardItem>("ssh_"+host);
-                    item->setText(host);
-                    item->setIconPath(d->icon);
 
                     QString target = host;
                     if (!q_port.isEmpty())
@@ -152,9 +148,12 @@ void Ssh::Extension::handleQuery(Query * query) const {
                         target = QString("%1@%2").arg(q_user, target);
                     QString subtext = QString("Connect to '%1'").arg(target);
 
-                    item->setSubtext(subtext);
-                    item->setCompletion(QString("ssh %1").arg(target));
-                    item->addAction(make_shared<TermAction>(subtext, QStringList{"ssh", target}));
+                    auto item = makeStdItem("ssh_"+host,
+                                            d->icon,
+                                            host,
+                                            subtext,
+                                            ActionList { makeTermAction(subtext, QStringList{"ssh", target}) },
+                                            QString("ssh %1").arg(target));
 
                     query->addMatch(std::move(item), static_cast<uint>(1.0*q_host.size()/host.size()* UINT_MAX));
                 }
@@ -162,14 +161,17 @@ void Ssh::Extension::handleQuery(Query * query) const {
 
             if (query->isTriggered() && !q_host.isEmpty()) {
                 // Add the quick connect item
-                auto item  = std::make_shared<StandardItem>();
-                item->setText(trimmed);
-                item->setSubtext("Quick connect to an unknown host");
-                item->setCompletion(QString("ssh %1").arg(trimmed));
-                item->setIconPath(d->icon);
-                item->addAction(make_shared<TermAction>(QString("Connect to '%1'").arg(match.captured(0)),
-                                                        QStringList{"ssh", trimmed}));
-                query->addMatch(std::move(item));
+                query->addMatch(makeStdItem(
+                    "",
+                    d->icon,
+                    trimmed,
+                    "Quick connect to an unknown host",
+                    ActionList {
+                        makeTermAction(QString("Connect to '%1'").arg(match.captured(0)),
+                                       QStringList{"ssh", trimmed})
+                    },
+                    QString("ssh %1").arg(trimmed)
+                ));
             }
         }
     }
@@ -182,23 +184,34 @@ void Ssh::Extension::rescan() {
 
     map<QString, QString> hosts;
 
-    // Get the hosts in config
-    for (const QString& path : { QString("/etc/ssh/config"), QDir::home().filePath(".ssh/config") }) {
+    std::function<void(const QString&)> scanfile = [&scanfile, &hosts](const QString& path) {
         if (QFile::exists(path)) {
             QFile file(path);
             if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
                 QTextStream in(&file);
                 while (!in.atEnd()) {
                     QStringList fields = in.readLine().split(QRegularExpression("\\s+"), QString::SkipEmptyParts);
-                    if ( fields.size() > 1 && fields[0] == "Host")
+                    if ( fields.size() > 1 && fields[0] == "Host") {
                         for ( int i = 1; i < fields.size(); ++i )
                             if ( !(fields[i].contains('*') || fields[i].contains('?')) )
                                 hosts.emplace(fields[i], QString());
+                    } else if (fields.size() > 1 && fields[0] == "Include") {
+                        // TODO move this somewhere else
+                        // TODO make it proper tilde expansion
+                        if (fields[1][0] == '~') {
+                            fields[1].remove(0,1).insert(0, QDir::homePath());
+                        }
+                        scanfile(fields[1]);
+                    }
                 }
                 file.close();
             }
         }
-    }
+    };
+
+    // Get the hosts in config
+    for (const QString& path : { QString("/etc/ssh/config"), QDir::home().filePath(".ssh/config") })
+        scanfile(path);
 
     // Get the hosts in known_hosts
     if (d->useKnownHosts) {

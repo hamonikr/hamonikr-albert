@@ -1,16 +1,19 @@
-// Copyright (C) 2014-2018 Manuel Schneider
+// Copyright (C) 2014-2020 Manuel Schneider
 
-#include <QDebug>
 #include <QPointer>
 #include <QRegularExpression>
 #include <QSettings>
 #include <array>
-#include "configwidget.h"
-#include "extension.h"
-#include "albert/util/shutil.h"
 #include "albert/util/standardactions.h"
 #include "albert/util/standarditem.h"
+#include "configwidget.h"
+#include "extension.h"
 #include "xdg/iconlookup.h"
+Q_LOGGING_CATEGORY(qlc, "system")
+#define DEBG qCDebug(qlc,).noquote()
+#define INFO qCInfo(qlc,).noquote()
+#define WARN qCWarning(qlc,).noquote()
+#define CRIT qCCritical(qlc,).noquote()
 using namespace std;
 using namespace Core;
 
@@ -80,7 +83,7 @@ QString defaultCommand(SupportedCommands command){
 
         if (de == "Unity" || de == "Pantheon" || de == "GNOME")
             switch (command) {
-            case LOCK:      return "gnome-screensaver-command --lock";
+            case LOCK:      return "dbus-send --type=method_call --dest=org.gnome.ScreenSaver /org/gnome/ScreenSaver org.gnome.ScreenSaver.Lock";
             case LOGOUT:    return "gnome-session-quit --logout";
             case SUSPEND:   break ;
             case HIBERNATE: break ;
@@ -238,12 +241,12 @@ void System::Extension::handleQuery(Core::Query * query) const {
     for (size_t i = 0; i < NUMCOMMANDS; ++i) {
         for (auto &alias : aliases[i]) {
             if ( alias.startsWith(query->string(), Qt::CaseInsensitive) ) {
-                auto item = std::make_shared<Core::StandardItem>(configNames[i]);
-                item->setText(QString(itemTitles[i]).replace(re, "<u>\\1</u>"));
-                item->setSubtext(itemDescriptions[i]);
-                item->setIconPath(d->iconPaths[i]);
-                item->addAction(make_shared<ProcAction>(itemDescriptions[i], QStringList(Core::ShUtil::split(d->commands[i]))));
-                query->addMatch(std::move(item), static_cast<uint>(static_cast<float>(query->string().size())/itemTitles[i].size()*UINT_MAX));
+                auto item = makeStdItem(configNames[i],
+                                        d->iconPaths[i],
+                                        QString(itemTitles[i]).replace(re, "<u>\\1</u>"),
+                                        itemDescriptions[i],
+                                        ActionList { makeProcAction(itemDescriptions[i], QStringList{"/bin/sh", "-c", d->commands[i]}) });
+                query->addMatch(std::move(item), static_cast<uint>(static_cast<uint>(query->string().size() / itemTitles[i].size() * UINT_MAX)));
                 break;
             }
         }

@@ -1,10 +1,12 @@
 // Copyright (C) 2014-2018 Manuel Schneider
 
 #pragma once
+#include <QLoggingCategory>
 #include <QObject>
 #include "albert/extension.h"
 #include "albert/queryhandler.h"
 #include <memory>
+Q_DECLARE_LOGGING_CATEGORY(qlc)
 
 namespace FirefoxBookmarks {
 
@@ -26,7 +28,8 @@ public:
     QWidget *widget(QWidget *parent = nullptr) override;
     void handleQuery(Core::Query * query) const override;
 
-    void setProfile(const QString &profile);
+    void setProfile(int);
+    void setProfile(const QString&);
     void changeFuzzyness(bool fuzzy);
     void changeOpenPolicy(bool withFirefox);
 

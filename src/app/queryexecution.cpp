@@ -1,6 +1,5 @@
 // Copyright (C) 2014-2018 Manuel Schneider
 
-#include <QDebug>
 #include <QString>
 #include <QVariant>
 #include <QtConcurrent>
@@ -13,13 +12,27 @@
 #include "albert/item.h"
 #include "albert/queryhandler.h"
 #include "albert/util/itemroles.h"
-#include "matchcompare.h"
+#include "logging.h"
 #include "queryexecution.h"
 using namespace std;
 using namespace chrono;
 
 namespace {
     const int FETCH_SIZE = 20;
+
+    struct MatchCompare
+    {
+        bool operator()(const pair<shared_ptr<Core::Item>, uint> &lhs,
+                        const pair<shared_ptr<Core::Item>, uint> &rhs) {
+            // Compare urgency then score
+            if (lhs.first->urgency() != rhs.first->urgency())
+                return lhs.first->urgency() < rhs.first->urgency();
+            else if (lhs.second != rhs.second)
+                return lhs.second > rhs.second; // Compare match score
+            else
+                return lhs.first->text().size() < rhs.first->text().size();
+        }
+    };
 }
 
 
@@ -130,7 +143,7 @@ void Core::QueryExecution::runBatchHandlers() {
         system_clock::time_point start = system_clock::now();
         queryHandler->handleQuery(&query_);
         long duration = duration_cast<microseconds>(system_clock::now()-start).count();
-        qDebug() << qPrintable(QString("TIME: %1 µs MATCHES [%2]").arg(duration, 6).arg(queryHandler->id));
+        DEBG << qPrintable(QString("TIME: %1 µs MATCHES [%2]").arg(duration, 6).arg(queryHandler->id));
         return make_pair(queryHandler, static_cast<int>(duration));
     };
     future_ = QtConcurrent::mapped(batchHandlers_.begin(), batchHandlers_.end(), func);
@@ -151,7 +164,7 @@ void Core::QueryExecution::onBatchHandlersFinished() {
     query_.mutex_.unlock();
 
     // Sort the results
-    if (query_.trigger_.isNull()){
+    if (query_.trigger_.isNull() || query_.sort_){
         if ( fetchIncrementally_ ) {
             int sortUntil = min(sortedItems_ + FETCH_SIZE, static_cast<int>(results_.size()));
             partial_sort(results_.begin() + sortedItems_, results_.begin() + sortUntil,
@@ -163,7 +176,7 @@ void Core::QueryExecution::onBatchHandlersFinished() {
     }
 
     if ( realtimeHandlers_.empty() ){
-        if( results_.empty() && !query_.rawString_.isEmpty() ){
+        if( results_.empty() && !query_.isTriggered() && !query_.rawString_.isEmpty() ){
             results_ = fallbacks_;
             sortedItems_ = static_cast<int>(fallbacks_.size());
             fetchIncrementally_ = false;
@@ -192,7 +205,7 @@ void Core::QueryExecution::runRealtimeHandlers() {
         system_clock::time_point start = system_clock::now();
         queryHandler->handleQuery(&query_);
         long duration = duration_cast<microseconds>(system_clock::now()-start).count();
-        qDebug() << qPrintable(QString("TIME: %1 µs MATCHES REALTIME [%2]").arg(duration, 6).arg(queryHandler->id));
+        DEBG << qPrintable(QString("TIME: %1 µs MATCHES REALTIME [%2]").arg(duration, 6).arg(queryHandler->id));
         return make_pair(queryHandler, static_cast<int>(duration));
     };
     future_ = QtConcurrent::mapped(realtimeHandlers_.begin(), realtimeHandlers_.end(), func);
@@ -216,7 +229,7 @@ void Core::QueryExecution::onRealtimeHandlersFinsished() {
     fiftyMsTimer_.disconnect();
     insertPendingResults();
 
-    if( results_.empty() && !query_.rawString_.isEmpty() ){
+    if( results_.empty() && !query_.isTriggered() && !query_.rawString_.isEmpty() ){
         beginInsertRows(QModelIndex(), 0, static_cast<int>(fallbacks_.size()-1));
         results_ = fallbacks_;
         endInsertRows();
@@ -251,7 +264,7 @@ void Core::QueryExecution::insertPendingResults() {
 
 /** ***************************************************************************/
 int Core::QueryExecution::rowCount(const QModelIndex &) const {
-    return query_.trigger_.isNull() && fetchIncrementally_ ? sortedItems_ : static_cast<int>(results_.size());
+    return (query_.trigger_.isNull() || query_.sort_) && fetchIncrementally_ ? sortedItems_ : static_cast<int>(results_.size());
 }
 
 
@@ -304,7 +317,7 @@ QVariant Core::QueryExecution::data(const QModelIndex &index, int role) const {
 /** ***************************************************************************/
 bool Core::QueryExecution::canFetchMore(const QModelIndex & /* index */) const
 {
-    if (query_.trigger_.isNull() && fetchIncrementally_ && sortedItems_ < static_cast<int>(results_.size()))
+    if ((query_.trigger_.isNull() || query_.sort_) && fetchIncrementally_ && sortedItems_ < static_cast<int>(results_.size()))
         return true;
     else
         return false;
@@ -315,7 +328,7 @@ bool Core::QueryExecution::canFetchMore(const QModelIndex & /* index */) const
 void Core::QueryExecution::fetchMore(const QModelIndex & /* index */)
 {
     int sortUntil = min(sortedItems_ + FETCH_SIZE, static_cast<int>(results_.size()));
-    if (query_.trigger_.isNull())
+    if (query_.trigger_.isNull() || query_.sort_)
         partial_sort(results_.begin() + sortedItems_,
                      results_.begin() + sortUntil,
                      results_.end(),

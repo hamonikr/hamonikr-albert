@@ -1,0 +1,26 @@
+{
+	"BUILD_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/mpris/mpris_autogen",
+	"CMAKE_BINARY_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build",
+	"CMAKE_CURRENT_BINARY_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/mpris",
+	"CMAKE_CURRENT_SOURCE_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/mpris",
+	"CMAKE_SOURCE_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2",
+	"INCLUDE_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/mpris/mpris_autogen/include",
+	"INPUTS" : 
+	[
+		"/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/mpris/resources/1485099690_playback-pause.svg",
+		"/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/mpris/resources/1485099680_playback-play.svg",
+		"/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/mpris/resources/1485099683_playback-fast-forward.svg",
+		"/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/mpris/resources/1485099687_playback-rewind.svg",
+		"/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/mpris/resources/1485100510_primitive-square.svg"
+	],
+	"LOCK_FILE" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/mpris/CMakeFiles/mpris_autogen.dir/AutoRcc_mpris_EWIEGA46WW_Lock.lock",
+	"MULTI_CONFIG" : false,
+	"OPTIONS" : [ "-name", "mpris" ],
+	"OUTPUT_CHECKSUM" : "EWIEGA46WW",
+	"OUTPUT_NAME" : "qrc_mpris.cpp",
+	"RCC_EXECUTABLE" : "/usr/lib/qt5/bin/rcc",
+	"RCC_LIST_OPTIONS" : [ "--list" ],
+	"SETTINGS_FILE" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/mpris/CMakeFiles/mpris_autogen.dir/AutoRcc_mpris_EWIEGA46WW_Used.txt",
+	"SOURCE" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/mpris/mpris.qrc",
+	"VERBOSITY" : 0
+}

@@ -1,0 +1,30 @@
+{
+	"BUILD_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/websearch/websearch_autogen",
+	"CMAKE_BINARY_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build",
+	"CMAKE_CURRENT_BINARY_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/websearch",
+	"CMAKE_CURRENT_SOURCE_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/websearch",
+	"CMAKE_SOURCE_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2",
+	"INCLUDE_DIR" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/websearch/websearch_autogen/include",
+	"INPUTS" : 
+	[
+		"/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/websearch/resources/wikipedia.svg",
+		"/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/websearch/resources/wolfram.png",
+		"/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/websearch/resources/duckduckgo.svg",
+		"/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/websearch/resources/amazon.svg",
+		"/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/websearch/resources/ebay.svg",
+		"/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/websearch/resources/youtube.svg",
+		"/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/websearch/resources/google.svg",
+		"/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/websearch/resources/default.svg",
+		"/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/websearch/resources/octocat.svg"
+	],
+	"LOCK_FILE" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/websearch/CMakeFiles/websearch_autogen.dir/AutoRcc_websearch_EWIEGA46WW_Lock.lock",
+	"MULTI_CONFIG" : false,
+	"OPTIONS" : [ "-name", "websearch" ],
+	"OUTPUT_CHECKSUM" : "EWIEGA46WW",
+	"OUTPUT_NAME" : "qrc_websearch.cpp",
+	"RCC_EXECUTABLE" : "/usr/lib/qt5/bin/rcc",
+	"RCC_LIST_OPTIONS" : [ "--list" ],
+	"SETTINGS_FILE" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/build/plugins/websearch/CMakeFiles/websearch_autogen.dir/AutoRcc_websearch_EWIEGA46WW_Used.txt",
+	"SOURCE" : "/home/hamonikr/workspaces/tmp/albert-0.17.2/plugins/websearch/websearch.qrc",
+	"VERBOSITY" : 0
+}

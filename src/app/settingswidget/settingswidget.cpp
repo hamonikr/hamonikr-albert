@@ -4,7 +4,6 @@
 #include <QCheckBox>
 #include <QCloseEvent>
 #include <QComboBox>
-#include <QDebug>
 #include <QDesktopWidget>
 #include <QFocusEvent>
 #include <QMessageBox>
@@ -19,13 +18,13 @@
 #include "../frontendmanager.h"
 #include "../pluginspec.h"
 #include "../querymanager.h"
-#include "../telemetry.h"
 #include "../trayicon.h"
 #include "albert/extension.h"
 #include "albert/frontend.h"
 #include "globalshortcut/hotkeymanager.h"
 #include "grabkeybutton.h"
 #include "loadermodel.h"
+#include "logging.h"
 #include "settingswidget.h"
 // TODO: Remove Apr 2020
 #ifdef BUILD_WITH_QTCHARTS
@@ -48,15 +47,13 @@ Core::SettingsWidget::SettingsWidget(ExtensionManager *extensionManager,
                                      QueryManager *queryManager,
                                      HotkeyManager *hotkeyManager,
                                      TrayIcon *systemTrayIcon,
-                                     Telemetry *telemetry,
                                      QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f),
       extensionManager_(extensionManager),
       frontendManager_(frontendManager),
       queryManager_(queryManager),
       hotkeyManager_(hotkeyManager),
-      trayIcon_(systemTrayIcon),
-      telemetry_(telemetry) {
+      trayIcon_(systemTrayIcon) {
 
     ui.setupUi(this);
 
@@ -66,13 +63,18 @@ Core::SettingsWidget::SettingsWidget(ExtensionManager *extensionManager,
      */
 
     // HOTKEY
-    QSet<int> hks = hotkeyManager->hotkeys();
-    if (hks.size() < 1)
-        ui.grabKeyButton_hotkey->setText("Press to set hotkey");
-    else
-        ui.grabKeyButton_hotkey->setText(QKeySequence(*hks.begin()).toString()); // OMG
-    connect(ui.grabKeyButton_hotkey, &GrabKeyButton::keyCombinationPressed,
-            this, &SettingsWidget::changeHotkey);
+    if (hotkeyManager) {
+        QSet<int> hks = hotkeyManager->hotkeys();
+        if (hks.size() < 1)
+            ui.grabKeyButton_hotkey->setText("Press to set hotkey");
+        else
+            ui.grabKeyButton_hotkey->setText(QKeySequence(*hks.begin()).toString()); // OMG
+        connect(ui.grabKeyButton_hotkey, &GrabKeyButton::keyCombinationPressed,
+                this, &SettingsWidget::changeHotkey);
+    } else {
+        ui.grabKeyButton_hotkey->setVisible(false);
+        ui.label_hotkey->setVisible(false);
+    }
 
     // TRAY
     ui.checkBox_showTray->setChecked(trayIcon_->isVisible());
@@ -84,12 +86,8 @@ Core::SettingsWidget::SettingsWidget(ExtensionManager *extensionManager,
     connect(ui.checkBox_incrementalSort, &QCheckBox::toggled,
             queryManager_, &QueryManager::setIncrementalSort);
 
-    // TELEMETRY
-    ui.checkBox_telemetry->setChecked(telemetry_->isEnabled());
-    connect(ui.checkBox_telemetry, &QCheckBox::toggled, this, [this](bool checked){ telemetry_->enable(checked); });
-
     // AUTOSTART
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
     QString desktopfile_path = QStandardPaths::locate(QStandardPaths::ApplicationsLocation,
                                                       "albert.desktop",
                                                       QStandardPaths::LocateFile);
@@ -105,10 +103,10 @@ Core::SettingsWidget::SettingsWidget(ExtensionManager *extensionManager,
         });
     }
     else
-        qCritical() << "Deskop entry not found! Autostart option is nonfuctional";
-#elif
+        CRIT << "Deskop entry not found! Autostart option is nonfuctional";
+#else
     ui.autostartCheckBox->setEnabled(false);
-    qWarning() << "Autostart not implemented on this platform!"
+    WARN << "Autostart not implemented on this platform!"
 #endif
 
     // FRONTEND
@@ -151,13 +149,14 @@ Core::SettingsWidget::SettingsWidget(ExtensionManager *extensionManager,
 
 
     // TERM CMD (TOOOOOOOOOOODOOOOOOOOOO CENTRALIZE THIS)
-    // Define the (global extern) terminal command
-    terminalCommand = QSettings(qApp->applicationName()).value(CFG_TERM, QString()).toString();
+
+    Q_ASSERT(terminalCommand.isEmpty());
 
     // Available terms
     std::vector<std::pair<QString, QString>> terms {
         // Distro terms
         {"Deepin Terminal", "deepin-terminal -x"},
+        {"Elementary Terminal", "io.elementary.terminal -x"},
         {"Gnome Terminal", "gnome-terminal --"},
         {"Konsole", "konsole -e"},
         {"LXTerminal", "lxterminal -e"},
@@ -165,23 +164,37 @@ Core::SettingsWidget::SettingsWidget(ExtensionManager *extensionManager,
         {"XFCE-Terminal", "xfce4-terminal -x"},
         // Standalone terms
         {"Cool Retro Term", "cool-retro-term -e"},
+        {"QTerminal", "qterminal -e"},
         {"RoxTerm", "roxterm -x"},
         {"Terminator", "terminator -x"},
+        {"Termite", "termite -e"},
+        {"Tilix", "tilix -e"},
         {"UXTerm", "uxterm -e"},
-        {"XTerm", "xterm -e"},
-        {"urxvt", "urxvt -e"}
+        {"Urxvt", "urxvt -e"},
+        {"XTerm", "xterm -e"}
     };
 
     // Filter available terms by availability
-    for (auto it = terms.cbegin(); it != terms.cend(); ++it)
+    for (auto it = terms.cbegin(); it != terms.cend();)
         if (QStandardPaths::findExecutable(it->second.split(' ').first()).isEmpty())
             it = terms.erase(it);
         else
             ++it;
 
-    // if terminalCommand is not set, use the first found
-    if (terminalCommand.isNull())
-        terminalCommand = terms[0].second;
+    if (terms.empty())
+        WARN << "No terminals found.";
+
+    // Set the terminal command
+    terminalCommand = QSettings(qApp->applicationName()).value(CFG_TERM, QString()).toString();
+    if (terminalCommand.isNull()){
+        if (terms.empty()){
+            CRIT << "No terminal command set. Terminal actions wont work as expected!";
+            terminalCommand = "";
+        } else {
+            terminalCommand = terms[0].second;
+            WARN << "No terminal command set. Using" << terminalCommand;
+        }
+    }
 
     // Fill checkbox
     for (const auto & t : terms)
@@ -276,19 +289,19 @@ void SettingsWidget::updatePluginInformations(const QModelIndex & current) {
     delete i->widget();
     delete i;
 
-    if ( extensionManager_->extensionSpecs()[static_cast<size_t>(current.row())]->state()
-         == PluginSpec::State::Loaded ){
-        Extension *extension = dynamic_cast<Extension*>(
-                    extensionManager_->extensionSpecs()[static_cast<size_t>(current.row())]->instance());
-        if (!extension){
-            qWarning() << "Cannot cast an object of extension spec to an extension!";
-            return; // Should no happen
-        }
+    PluginSpec *spec = extensionManager_->extensionSpecs()[static_cast<size_t>(current.row())].get();
+    if (spec->state() == PluginSpec::State::Loaded) {
+
+        Extension *extension = dynamic_cast<Extension*>(spec->instance());
+        if (!extension)
+            qFatal("Cannot cast an object of extension spec to an extension!");
+
         QWidget *pw = extension->widget();
-        if ( pw->layout() != nullptr)
-            pw->layout()->setMargin(0);
         ui.widget_pluginInfos->layout()->addWidget(pw);// Takes ownership
-        ui.label_pluginTitle->setText(extension->name());
+        ui.label_pluginTitle->setText(QString("<html><head/><body><p>"
+                                              "<span style=\"font-size:12pt;\">%1 </span>"
+                                              "<span style=\"font-size:8pt; font-style:italic; color:#a0a0a0;\">%3 %2</span>"
+                                              "</p></body></html>").arg(extension->name(), spec->version(), spec->id()));
         ui.label_pluginTitle->show();
     }
     else{
@@ -306,6 +319,7 @@ void SettingsWidget::updatePluginInformations(const QModelIndex & current) {
 
 /** ***************************************************************************/
 void SettingsWidget::changeHotkey(int newhk) {
+    Q_ASSERT(hotkeyManager_);
     int oldhk = *hotkeyManager_->hotkeys().begin(); //TODO Make cool sharesdpointer design
 
     // Try to set the hotkey
@@ -347,7 +361,7 @@ void SettingsWidget::keyPressEvent(QKeyEvent *event) {
 
 /** ***************************************************************************/
 void SettingsWidget::closeEvent(QCloseEvent *event) {
-    if (hotkeyManager_->hotkeys().empty()) {
+    if (hotkeyManager_ && hotkeyManager_->hotkeys().empty()) {
         QMessageBox msgBox(QMessageBox::Warning, "Hotkey Missing",
                            "Hotkey is invalid, please set it. Press OK to go "\
                            "back to the settings.",

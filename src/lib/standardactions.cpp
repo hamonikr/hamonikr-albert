@@ -1,125 +1,105 @@
 // Copyright (C) 2014-2019 Manuel Schneider
 
-#include <QGuiApplication>
 #include <QClipboard>
+#include <QDebug>
 #include <QDesktopServices>
+#include <QGuiApplication>
 #include <QProcess>
 #include <QStringList>
 #include <pwd.h>
 #include <unistd.h>
-#include "albert/util/shutil.h"
 #include "standardactions.h"
+
+namespace  {
+
+void runDetached(const QStringList &commandline, const QString &workingDirectory) {
+    if (commandline.isEmpty()){
+        qDebug() << "NOP: commandline is empty";
+    } else {
+        qint64 pid;
+        QStringList mutableCmdLn(commandline);
+        if (QProcess::startDetached(mutableCmdLn.takeFirst(), mutableCmdLn, workingDirectory, &pid))
+            qInfo() << "Detached process started successfully. PID:" << pid << commandline;
+        else
+            qWarning() << "Starting detached process failed." << commandline;
+    }
+}
+
+}
 
 // Place it somewhere for now. TODO: move it to potential core plugin
 EXPORT_CORE QString terminalCommand;
 
 /** **************************************************************************/
 Core::StandardActionBase::StandardActionBase(const QString &text)
-    : text_(std::move(text))
-{
+    : text_(text) { }
 
-}
-
-QString Core::StandardActionBase::text() const
-{
+QString Core::StandardActionBase::text() const {
     return text_;
 }
 
 
 /** **************************************************************************/
 Core::FuncAction::FuncAction(const QString &text, std::function<void ()> action)
-    : StandardActionBase(text), action_(std::move(action))
-{
+    : StandardActionBase(text), action_(action) { }
 
-}
-
-void Core::FuncAction::activate()
-{
+void Core::FuncAction::activate() const {
     action_();
 }
 
 
 /** **************************************************************************/
-Core::ClipAction::ClipAction(const QString &text, QString clipBoardText)
-    : StandardActionBase(text), clipBoardText_(std::move(clipBoardText))
-{
+Core::ClipAction::ClipAction(const QString &text,const QString &clipBoardText)
+    : StandardActionBase(text), clipBoardText_(clipBoardText) { }
 
-}
-
-void Core::ClipAction::activate()
-{
+void Core::ClipAction::activate() const {
     QGuiApplication::clipboard()->setText(clipBoardText_);
 }
 
 
 /** **************************************************************************/
-Core::UrlAction::UrlAction(const QString &text, QUrl url)
-    : StandardActionBase(text), url_(std::move(url))
-{
+Core::UrlAction::UrlAction(const QString &text,const QUrl &url)
+    : StandardActionBase(text), url_(url) { }
 
-}
-
-void Core::UrlAction::activate()
-{
+void Core::UrlAction::activate() const {
     QDesktopServices::openUrl(url_);
 }
 
 
 /** **************************************************************************/
 Core::ProcAction::ProcAction(const QString &text, const QStringList &commandline, const QString &workingDirectory)
-    : StandardActionBase(text), commandline_(commandline), workingDir_(workingDirectory)
-{
+    : StandardActionBase(text), commandline_(commandline), workingDir_(workingDirectory) { }
 
+void Core::ProcAction::activate() const {
+    runDetached(commandline_, workingDir_);
 }
 
-void Core::ProcAction::activate()
-{
-    if (commandline_.isEmpty())
-        return;
+/** **************************************************************************/
+Core::TermAction::TermAction(const QString &text, const QStringList &commandline, const QString &workingDirectory)
+    : StandardActionBase(text), commandline_(commandline), workingDir_(workingDirectory) { }
 
-    QStringList commandline = commandline_;
-    if (workingDir_.isEmpty())
-        QProcess::startDetached(commandline.takeFirst(), commandline);
-    else
-        QProcess::startDetached(commandline.takeFirst(), commandline, workingDir_);
+Core::TermAction::TermAction(const QString &text, const QString &script, Core::TermAction::CloseBehavior closeBehavior, const QString &workingDirectory)
+    : StandardActionBase(text), workingDir_(workingDirectory) {
+
+    // Get the user shell (passwd must not be freed)
+    passwd *pwd = getpwuid(geteuid());
+    if (pwd == nullptr)
+        throw "Could not retrieve user shell";
+
+    switch (closeBehavior) {
+    case CloseBehavior::CloseOnExit:
+        commandline_ << pwd->pw_shell << "-ic" << script;
+        break;
+    case CloseBehavior::CloseOnSuccess:
+        commandline_ << pwd->pw_shell << "-ic" << QString("%1 || exec %2").arg(script, pwd->pw_shell);
+        break;
+    case CloseBehavior::DoNotClose:
+        commandline_ << pwd->pw_shell << "-ic" << QString("%1; exec %2").arg(script, pwd->pw_shell);
+    }
 }
 
 
 /** **************************************************************************/
-Core::TermAction::TermAction(const QString &text, const QStringList &commandline, const QString &workingDirectory, bool shell, Core::TermAction::CloseBehavior behavior)
-    : ProcAction (text, commandline, workingDirectory), shell_(shell), behavior_(behavior)
-{
-
-}
-
-void Core::TermAction::activate()
-{
-    if (commandline_.isEmpty())
-        return;
-
-    if (shell_){
-
-        // Quote the input commandline since it's nested
-        QStringList quotedCommandLine;
-        for (const QString &strRef : commandline_)
-            quotedCommandLine << ShUtil::quote(strRef);
-
-        // Get the user shell (passwd must not be freed)
-        passwd *pwd = getpwuid(geteuid());
-        if (pwd == nullptr)
-            throw "Could not retrieve user shell";
-
-        // Let standard shell handle flow control (syntax differs in shells, e.g. fish)
-        commandline_ = Core::ShUtil::split(terminalCommand);
-        if (behavior_ == CloseBehavior::DoNotClose)
-            commandline_ << "sh" << "-ic" << QString("%1 -ic '%2'; exec %1").arg(pwd->pw_shell, quotedCommandLine.join(' '));
-        else if (behavior_ == CloseBehavior::CloseOnSuccess)
-            commandline_ << "sh" << "-ic" << QString("%1 -ic '%2' && sleep 1 || exec %1").arg(pwd->pw_shell, quotedCommandLine.join(' '));
-        else  // behavior_ == CloseBehavior::CloseOnExit
-            commandline_ << "sh" << "-ic" << QString("%1 -ic '%2'; sleep 1 ").arg(pwd->pw_shell, quotedCommandLine.join(' '));
-    } else {
-        commandline_ = Core::ShUtil::split(terminalCommand) + commandline_;
-    }
-
-    ProcAction::activate();
+void Core::TermAction::activate() const {
+    runDetached(terminalCommand.split(QChar(QChar::Space), QString::SkipEmptyParts) << commandline_, workingDir_);
 }

@@ -1,5 +1,6 @@
 // Copyright (c) 2017-2018 Manuel Schneider
 
+// CAUTION ORDER MATTERS!
 #include <pybind11/embed.h>
 #include <pybind11/stl.h>
 #include "pythonmodulev1.h"
@@ -12,10 +13,10 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QLabel>
-#include <QMutex>
 #include <QProcess>
 #include <QProcess>
 #include <QRegularExpression>
+#include <QStandardPaths>
 #include <QVBoxLayout>
 #include <functional>
 #include <vector>
@@ -23,32 +24,38 @@
 #include "albert/query.h"
 #include "albert/util/standarditem.h"
 #include "xdg/iconlookup.h"
+Q_LOGGING_CATEGORY(qlc_python_modulev1, "python.modulev1")
+#define DEBG qCDebug(qlc_python_modulev1,).noquote()
+#define INFO qCInfo(qlc_python_modulev1,).noquote()
+#define WARN qCWarning(qlc_python_modulev1,).noquote()
+#define CRIT qCCritical(qlc_python_modulev1,).noquote()
 using namespace std;
 using namespace Core;
 namespace py = pybind11;
 
-Q_LOGGING_CATEGORY(qlc_python_modulev1, "python.modulev1")
-#define DEBUG qCDebug(qlc_python_modulev1).noquote()
-#define INFO qCInfo(qlc_python_modulev1).noquote()
-#define WARNING qCWarning(qlc_python_modulev1).noquote()
-#define CRITICAL qCCritical(qlc_python_modulev1).noquote()
-
-
 
 namespace {
 uint majorInterfaceVersion = 0;
-uint minorInterfaceVersion = 2;
+uint minorInterfaceVersion = 4;
 
-enum Target { IID, NAME, VERSION, TRIGGER, AUTHOR, DEPS};
+enum Target {
+    VERSION,
+    TITLE,
+    AUTHORS,
+    EXEC_DEPS,
+    PY_DEPS,
+    TRIGGERS
+};
 const QStringList targetNames = {
-    "__iid__",
-    "__prettyname__",
     "__version__",
-    "__trigger__",
-    "__author__",
-    "__dependencies__"
+    "__title__",
+    "__authors__",
+    "__exec_deps__",
+    "__py_deps__",
+    "__triggers__"
 };
 }
+
 
 class Python::PythonModuleV1Private
 {
@@ -63,14 +70,13 @@ public:
     py::module module;
 
     struct Spec {
-        QString iid;
-        QString prettyName;
-        QString author;
-        QString version;
-        QString trigger;
+        QString name;
         QString description;
-        QStringList dependencies;
-
+        QString version;
+        QStringList authors;
+        QStringList executableDependecies;
+        QStringList pythonDependecies;
+        QStringList triggers;
     } spec;
 };
 
@@ -94,7 +100,7 @@ Python::PythonModuleV1::PythonModuleV1(const QString &path) : d(new PythonModule
     else
         qFatal("This should never happen");
 
-    d->spec.prettyName = d->id = fileInfo.completeBaseName();
+    d->spec.name = d->id = fileInfo.completeBaseName();
     d->state = State::InvalidMetadata;
 
     readMetadata();
@@ -102,11 +108,15 @@ Python::PythonModuleV1::PythonModuleV1(const QString &path) : d(new PythonModule
 
 void Python::PythonModuleV1::readMetadata() {
 
-    DEBUG << "Reading metadata of python module:" << QFileInfo(d->path).fileName();
+    DEBG << "Reading metadata of python module:" << QFileInfo(d->path).fileName();
 
     py::gil_scoped_acquire acquire;
 
     try {
+
+        /*
+         * Parse the source code using ast
+         */
 
         // Get the extension spec source code
 
@@ -116,12 +126,10 @@ void Python::PythonModuleV1::readMetadata() {
         QString source = QTextStream(&file).readAll();
         file.close();
 
-        // Parse it with ast
+        // Parse it with ast and get all FunctionDef and Assign ast nodes
 
         py::module ast = py::module::import("ast");
         py::object ast_root = ast.attr("parse")(source.toStdString());
-
-        // Get all FunctionDef and Assign ast nodes
 
         std::map<QString, py::object> metadata_values;
         for (auto node : ast_root.attr("body")){
@@ -139,83 +147,124 @@ void Python::PythonModuleV1::readMetadata() {
             }
         }
 
-        // Check interface id
+        /*
+         * Check/get the mandatory metadata and check/get functions
+         */
 
-        QString targetName = targetNames[Target::IID];
-        if (!metadata_values.count(targetName))
-            throw QString("Module has no %1 specified").arg(targetName);
+        py::object obj;
 
-        py::object astStringType = py::module::import("ast").attr("Str");
-        py::object obj = metadata_values[targetName];
-        if (!py::isinstance(obj, astStringType))
-            throw QString("%1 is not of type ast.Str").arg(targetName);
+        // Check VERSION
 
-        d->spec.iid = obj.attr("s").cast<py::str>().cast<QString>();
-
-        QRegularExpression re("^PythonInterface\\/v(\\d)\\.(\\d)$");
-        QRegularExpressionMatch match = re.match(d->spec.iid);
-        if (!match.hasMatch())
-            throw QString("Invalid interface id: %1").arg(d->spec.iid);
-
-        uint maj = match.captured(1).toUInt();
-        if (maj != majorInterfaceVersion)
-            throw QString("Incompatible major interface version. Expected %1, got %2").arg(majorInterfaceVersion).arg(maj);
-
-        uint min = match.captured(2).toUInt();
-        if (min > minorInterfaceVersion)
-            throw QString("Incompatible minor interface version. Up to %1 supported, got %2").arg(minorInterfaceVersion).arg(min);
-
-        // Check mandatory handleQuery
-
-        if (!metadata_values.count("handleQuery"))
-            throw QString("Modules does not contain a function definition for 'handleQuery'");
-
-        if (py::len(metadata_values.at("handleQuery")) != 1)
-            throw QString("handleQuery function definition does not take exactly one argument");
-
-        // Extract mandatory metadata
-
-        obj = ast.attr("get_docstring")(ast_root);
-        if (py::isinstance<py::str>(obj))
-            d->spec.description = obj.cast<py::str>().cast<QString>();
-        else
-            throw QString("Module does not contain a docstring");
-
-        map<Target, QString&> zip{{Target::NAME, d->spec.prettyName},
-                                  {Target::VERSION, d->spec.version},
-                                  {Target::AUTHOR, d->spec.author}};
-        for (const auto &pair : zip) {
-            targetName = targetNames[pair.first];
-            if (metadata_values.count(targetName)){
-                obj = metadata_values[targetName];
-                if (py::isinstance(obj, astStringType))
-                    pair.second = obj.attr("s").cast<py::str>().cast<QString>();
-                else
-                    throw QString("%1 is not of type ast.Str").arg(targetName);
-            }
-            else
+        {
+            auto targetName = targetNames[Target::VERSION];
+            if (!metadata_values.count(targetName))
                 throw QString("Module has no %1 specified").arg(targetName);
-        }
 
-        // Extract optional metadata
-
-        targetName = targetNames[Target::TRIGGER];
-        if (metadata_values.count(targetName)){
-            obj = metadata_values[targetName];
-            if (py::isinstance(obj, astStringType))
-                d->spec.trigger = obj.attr("s").cast<py::str>().cast<QString>();
-            else
+            if (!py::isinstance(obj = metadata_values[targetName], ast.attr("Str")))
                 throw QString("%1 is not of type ast.Str").arg(targetName);
+
+            d->spec.version = obj.attr("s").cast<py::str>().cast<QString>();
+
+            QRegularExpression re("^(\\d)\\.(\\d)\\.(\\d)$");
+            QRegularExpressionMatch match = re.match(d->spec.version);
+            if (!match.hasMatch())
+                throw QString("Invalid version format: '%1'. Expected '%2'.").arg(match.captured(0), re.pattern());
+
+            uint maj = match.captured(1).toUInt();
+            if (maj != majorInterfaceVersion)
+                throw QString("Incompatible major interface version. Expected %1, got %2").arg(majorInterfaceVersion).arg(maj);
+
+            uint min = match.captured(2).toUInt();
+            if (min > minorInterfaceVersion)
+                throw QString("Incompatible minor interface version. Up to %1 supported, got %2. Maybe you should update albert.").arg(minorInterfaceVersion).arg(min);
         }
 
-        targetName = targetNames[Target::DEPS];
-        if (metadata_values.count(targetName)) {
-            py::list deps = metadata_values[targetName].attr("elts").cast<py::list>();
-            for (const py::handle dep : deps) {
-                if (py::isinstance(dep, astStringType))
-                    d->spec.dependencies.append(dep.attr("s").cast<py::str>().cast<QString>());
-                else
-                    throw QString("Dependencies contain non string values");
+        // Get pretty NAME
+
+        {
+            auto targetName = targetNames[Target::TITLE];
+            if (!metadata_values.count(targetName))
+                throw QString("Module has no %1 specified").arg(targetName);
+
+            if (!py::isinstance(obj = metadata_values[targetName], ast.attr("Str")))
+                throw QString("%1 is not of type ast.Str").arg(targetName);
+
+            d->spec.name = obj.attr("s").cast<py::str>().cast<QString>();
+
+        }
+
+        // Get description/docstring
+
+        {
+            obj = ast.attr("get_docstring")(ast_root);
+            if (py::isinstance<py::str>(obj))
+                d->spec.description = obj.cast<py::str>().cast<QString>();
+//            else
+//                throw QString("Module does not contain a docstring");
+        }
+
+        // Check functions
+
+        {
+            if (!metadata_values.count("handleQuery"))
+                throw QString("Modules does not contain a function definition for 'handleQuery'");
+
+            if (py::len(metadata_values.at("handleQuery")) != 1)
+                throw QString("handleQuery function definition does not take exactly one argument");
+        }
+
+        /*
+         * Check/get optional metadata
+         */
+
+        {
+            map<Target, QStringList&> zip{
+                {Target::AUTHORS,   d->spec.authors},
+                {Target::EXEC_DEPS, d->spec.executableDependecies},
+                {Target::PY_DEPS,   d->spec.pythonDependecies},
+                {Target::TRIGGERS,  d->spec.triggers}
+            };
+            for (const auto &pair : zip) {
+                auto targetName = targetNames[pair.first];
+                if (metadata_values.count(targetName)){
+                    obj = metadata_values[targetName];
+                    if (py::isinstance(obj, ast.attr("List"))) {
+                        py::list list = obj.attr("elts").cast<py::list>();
+                        for (const py::handle item : list) {
+                            if (py::isinstance(item, ast.attr("Str")))
+                                pair.second << item.attr("s").cast<py::str>().cast<QString>();
+                            else
+                                throw QString("%1 list contains non string values").arg(targetName);
+                        }
+                    }
+                    else if (py::isinstance(obj, ast.attr("Str"))){
+                        pair.second << obj.attr("s").cast<py::str>().cast<QString>();
+                    }
+                    else
+                        throw QString("%1 is not list or string").arg(targetName);
+                }
+            }
+        }
+
+        /*
+         * Check/get optional metadata
+         */
+
+        {
+            for (const auto& exec : d->spec.executableDependecies)
+                if (QStandardPaths::findExecutable(exec).isNull())
+                    d->errorString = QString("No '%1' in $PATH.").arg(exec);
+
+            py::module importlib = py::module::import("importlib");
+            py::module importlib_util = py::module::import("importlib.util");
+            for (const auto& dep : d->spec.pythonDependecies)
+                if (importlib_util.attr("find_spec")(QString(dep)).is_none())
+                    d->errorString = QString("Could not locate python module '%1'.").arg(dep);
+
+            if (!d->errorString.isNull()){
+                INFO << d->errorString;
+                d->state = State::MissingDeps;
+                return;
             }
         }
 
@@ -224,13 +273,13 @@ void Python::PythonModuleV1::readMetadata() {
     catch(const QString &error)
     {
         d->errorString = error;
-        WARNING << QString("[%1] %2").arg(d->id).arg(d->errorString);
+        WARN << QString("[%1] %2").arg(d->id).arg(d->errorString);
         d->state = State::InvalidMetadata;
     }
     catch(const std::exception &e)
     {
         d->errorString = e.what();
-        WARNING << QString("[%1] %2").arg(d->id).arg(d->errorString);
+        WARN << QString("[%1] %2").arg(d->id).arg(d->errorString);
         d->state = State::InvalidMetadata;
     }
 }
@@ -245,14 +294,14 @@ Python::PythonModuleV1::~PythonModuleV1() {
 /** ***************************************************************************/
 void Python::PythonModuleV1::load(){
 
-    if (d->state == State::Loaded || d->state == State::InvalidMetadata)
+    if (d->state == State::Loaded)
         return;
 
     py::gil_scoped_acquire acquire;
 
     try
     {
-        DEBUG << "Loading" << d->path;
+        INFO << "Loading" << d->path;
 
         py::module importlib = py::module::import("importlib");
         py::module importli_util = py::module::import("importlib.util");
@@ -268,7 +317,7 @@ void Python::PythonModuleV1::load(){
     catch(const std::exception &e)
     {
         d->errorString = e.what();
-        WARNING << QString("[%1] %2.").arg(QFileInfo(d->path).fileName()).arg(d->errorString);
+        WARN << QString("[%1] %2.").arg(QFileInfo(d->path).fileName()).arg(d->errorString);
         d->module = py::object();
         d->state = State::Error;
         return;
@@ -281,17 +330,16 @@ void Python::PythonModuleV1::load(){
 /** ***************************************************************************/
 void Python::PythonModuleV1::unload(){
 
-    if (d->state == State::Unloaded)
+    if (!(d->state == State::Unloaded || d->state == State::Unloaded))
         return;
 
     if (d->state == State::Loaded) {
 
-        DEBUG << "Unloading" << d->path;
+        INFO << "Unloading" << d->path;
 
         py::gil_scoped_acquire acquire;
 
-        try
-        {
+        try {
             // Call fini function, if exists
             if (py::hasattr(d->module, "finalize"))
                 if (py::isinstance<py::function>(d->module.attr("finalize")))
@@ -299,10 +347,8 @@ void Python::PythonModuleV1::unload(){
 
             // Dereference module, unloads hopefully
             d->module = py::object();
-        }
-        catch(std::exception const &e)
-        {
-            WARNING << QString("[%1] %2.").arg(QFileInfo(d->path).fileName()).arg(e.what());
+        } catch(std::exception const &e) {
+            WARN << QString("[%1] %2.").arg(QFileInfo(d->path).fileName()).arg(e.what());
         }
     }
 
@@ -318,8 +364,7 @@ void Python::PythonModuleV1::handleQuery(Query *query) const {
 
     try {
         vector<pair<shared_ptr<Core::Item>,uint>> results;
-        py::function f = py::function(d->module.attr("handleQuery"));
-        py::object pythonResult = f(query);
+        py::object pythonResult = py::function(d->module.attr("handleQuery"))(query);
 
         if ( !query->isValid() )
             return;
@@ -342,23 +387,26 @@ void Python::PythonModuleV1::handleQuery(Query *query) const {
     }
     catch(const exception &e)
     {
-        WARNING << QString("[%1] %2.").arg(d->id).arg(e.what());
+        WARN << QString("[%1] %2.").arg(d->id).arg(e.what());
     }
 }
 
 
 /** ***************************************************************************/
 Python::PythonModuleV1::State Python::PythonModuleV1::state() const { return d->state; }
-const QString &Python::PythonModuleV1::errorString() const { return d->errorString; }
-const QString &Python::PythonModuleV1::path() const { return d->path; }
-const QString &Python::PythonModuleV1::sourcePath() const { return d->sourceFilePath; }
-const QString &Python::PythonModuleV1::id() const { return d->id; }
-const QString &Python::PythonModuleV1::name() const { return d->spec.prettyName; }
-const QString &Python::PythonModuleV1::author() const { return d->spec.author; }
-const QString &Python::PythonModuleV1::version() const { return d->spec.version; }
-const QString &Python::PythonModuleV1::description() const { return d->spec.description; }
-const QString &Python::PythonModuleV1::trigger() const { return d->spec.trigger; }
-const QStringList &Python::PythonModuleV1::dependencies() const { return d->spec.dependencies; }
+QString Python::PythonModuleV1::errorString() const { return d->errorString; }
+
+QString Python::PythonModuleV1::path() const { return d->path; }
+QString Python::PythonModuleV1::sourcePath() const { return d->sourceFilePath; }
+
+QString Python::PythonModuleV1::id() const { return d->id; }
+QString Python::PythonModuleV1::name() const { return d->spec.name; }
+QString Python::PythonModuleV1::description() const { return d->spec.description; }
+QString Python::PythonModuleV1::version() const { return d->spec.version; }
+QStringList Python::PythonModuleV1::authors() const { return d->spec.authors; }
+QStringList Python::PythonModuleV1::executableDependecies() const { return d->spec.executableDependecies; }
+QStringList Python::PythonModuleV1::pythonDependecies() const { return d->spec.pythonDependecies; }
+QStringList Python::PythonModuleV1::triggers() const { return d->spec.triggers; }
 
 
 

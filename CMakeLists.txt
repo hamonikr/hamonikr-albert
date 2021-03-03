@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1.3)  # Least supporting CMAKE_CXX_STANDARD
 ###############################################################################
 
-project(albert VERSION 0.16.1)
+project(albert VERSION 0.17.2)
 
 ###############################################################################
 
@@ -88,6 +88,7 @@ find_package(Qt5 5.5.0
         Network
         Sql
         Widgets
+        X11Extras
     OPTIONAL_COMPONENTS
         Charts
 )
@@ -118,6 +119,7 @@ target_link_libraries(${TARGET_NAME_BIN}
         Qt5::Network
         Qt5::Sql
         Qt5::Widgets
+        Qt5::X11Extras
         albert::lib
         globalshortcut
         xdg
@@ -137,6 +139,9 @@ install(TARGETS ${TARGET_NAME_LIB} ${TARGET_NAME_BIN}
 # Do platform specific post target stuff
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     # Install desktop entry and icon
-   install(FILES resources/albert.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications )
+   # install(FILES resources/albert.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications )
    install(FILES resources/icons/albert.svg DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps)
+   # Add HamoniKR Default Settings
+   install(DIRECTORY "hamonikr/etc/" DESTINATION ${CMAKE_INSTALL_SYSCONFDIR})
+   install(FILES hamonikr/albert.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications )
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")

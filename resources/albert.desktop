@@ -2,12 +2,10 @@
 [Desktop Entry]
 Categories=Utility;
 Comment=A desktop agnostic launcher
-Comment[ko]=빠른 프로그램 실행도구
 Exec=albert
 GenericName=Launcher
 Icon=albert
 Name=Albert
-Name[ko]=런처
 StartupNotify=false
 Type=Application
 Version=1.0

@@ -1,3 +1,16 @@
+albert (0.17.2-0hamonikr1) stable; urgency=low
+
+  * Release for HamoniKR Server 2.0
+   - Update UPSTREAM src
+
+ -- HamoniKR <pkg@hamonikr.org>  Wed, 03 Mar 2021 15:44:31 +0900
+
+albert (0.17.2-0) stable; urgency=low
+
+  * Albert Upstream Release
+  
+ -- Manuel Schneider <manuelschneid3r@gmail.com>  Sun, 29 Oct 2017 00:00:00 +0000
+
 albert (0.16.1hamonikr2) stable; urgency=low
 
   * Update plugins/widgetboxmodel/share/themes/HamoniKR_Dark.qss

@@ -1,19 +1,24 @@
 # -*- coding: utf-8 -*-
 
-"""This is a simple python template extension that should show the API in a comprehensible way. \
-Use the module docstring to provide a detailed description of the extension"""
+"""This is a simple python template extension.
 
-from albertv0 import *
+This extension should show the API in a comprehensible way. Use the module docstring to provide a \
+description of the extension. The docstring should have three paragraphs: A brief description in \
+the first line, an optional elaborate description of the plugin, and finally the synopsis of the \
+extension.
+
+Synopsis: <trigger> [delay|throw] <query>"""
+
+from albert import *
 import os
 from time import sleep
 
 
-__iid__ = "PythonInterface/v0.1"
-__prettyname__ = "Api Test"
-__version__ = "1.0"
-__trigger__ = "test "
-__author__ = "Manuel Schneider"
-__dependencies__ = ["whatever"]
+__title__ = "Api Test"
+__version__ = "0.4.2"
+__triggers__ = "test "
+__authors__ = "manuelschneid3r"
+#__exec_deps__ = ["whatever"]
 
 iconPath = iconLookup("albert")
 
@@ -39,7 +44,7 @@ def handleQuery(query):
 
     if query.string.startswith("delay"):
         sleep(2)
-        return Item(id=__prettyname__,
+        return Item(id=__title__,
                     icon=os.path.dirname(__file__)+"/plugin.svg",
                     text="Delayed test item",
                     subtext="Query string: %s" % query.string)
@@ -65,7 +70,7 @@ def handleQuery(query):
     item.icon = iconPath
     item.text = 'Python item containing %s' % query.string
     item.subtext = 'Python description'
-    item.completion = __trigger__ + 'Completion Harharhar'
+    item.completion = __triggers__ + 'Completion Harharhar'
     item.urgency = ItemBase.Notification  # Alert, Normal
     info(item.icon)
     info(item.text)
@@ -77,11 +82,11 @@ def handleQuery(query):
     item.addAction(FuncAction("Print warning", lambda: warning(query.string)))
     results.append(item)
 
-    item = Item(id=__prettyname__,
+    item = Item(id=__title__,
                 icon=os.path.dirname(__file__)+"/plugin.svg",
                 text="This is the primary text",
                 subtext="This is the subtext, some kind of description",
-                completion=__trigger__ + 'Hellooohooo!',
+                completion=__triggers__ + 'Hellooohooo!',
                 urgency=ItemBase.Alert,
                 actions=[
                     FuncAction(text="FuncAction",
@@ -92,10 +97,14 @@ def handleQuery(query):
                               url="https://www.google.de"),
                     ProcAction(text="ProcAction",
                                commandline=["espeak", "hello"],
-                               cwd="~"),  # optional
+                               cwd="~"),
                     TermAction(text="TermAction",
                                commandline=["sleep", "5"],
-                               cwd="~/git")  # optional
+                               cwd="~/git"),
+                    TermAction(text="TermAction",
+                               script="[ -e issue ] && cat issue | echo /etc/issue not found.",
+                               behavior=TermAction.CloseBehavior.DoNotClose,
+                               cwd="/etc")
                 ])
     results.append(item)
 

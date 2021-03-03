@@ -1,10 +1,13 @@
 // Copyright (C) 2014-2018 Manuel Schneider
 
 #pragma once
+#include <QString>
 #include <QWidget>
-#include <QStringListModel>
 #include <memory>
 #include "albert/frontend.h"
+
+class QByteArray;
+class QAbstractItemModel;
 
 namespace WidgetBoxModel {
 
@@ -17,7 +20,7 @@ class FrontendWidget final : public QWidget
 public:
 
     FrontendWidget(QSettings*);
-    ~FrontendWidget();
+    ~FrontendWidget() override;
 
     bool isVisible();
     void setVisible(bool visible) override;
@@ -67,7 +70,6 @@ protected:
     void mousePressEvent(QMouseEvent * event) override;
     void mouseReleaseEvent(QMouseEvent * event) override;
     void resizeEvent(QResizeEvent* event) override;
-    bool nativeEvent(const QByteArray &eventType, void *message, long *) override;
     bool eventFilter(QObject*, QEvent *event) override;
 
     void setShowActions(bool showActions);

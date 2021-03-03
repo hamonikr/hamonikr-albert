@@ -1,12 +1,10 @@
 Source: albert
+Maintainer: Manuel Schneider <manuelschneid3r@gmail.com>
 Section: utils
 Priority: optional
-Maintainer: Manuel Schneider <manuelschneid3r@gmail.com>
-Standards-Version: 4.0.0
-Homepage: https://albertlauncher.github.io/
-Vcs-Git: ghttps://github.com/albertlauncher/albert.git
+Standards-Version: 4.1.0
 Build-Depends: 
-	debhelper (>=9),
+	debhelper (>=10),
 	cmake (>=3.1.3),
 	qtbase5-dev (>=5.5),
 	libqt5x11extras5-dev (>=5.5),
@@ -15,12 +13,17 @@ Build-Depends:
 	libmuparser-dev (>=2),
 	python3-dev (>=3.5),
 	lsb-release
-
+Homepage: https://albertlauncher.github.io/
+Vcs-Browser: https://github.com/albertlauncher
+Vcs-Git: https://github.com/albertlauncher/albert.git
 
 Package: albert
 Architecture: any
-Depends: ${shlibs:Depends}, libqt5sql5-sqlite
-Recommends: qml-module-qtgraphicaleffects, qml-module-qtquick-controls
+Depends:
+ ${shlibs:Depends},
+ libqt5sql5-sqlite,
+ qml-module-qtgraphicaleffects,
+ qml-module-qtquick-controls
 Description: A sophisticated, plugin-based, standalone keyboard launcher written in C++/Qt
  Albert is a unified and efficient access to your machine. Technically it is a keyboard launcher written in C++/Qt. The plugin based architecture makes it extremely flexible and powerful. Plugins can be used to create modular frontends or native extensions. Extensions can also be implemented using embedded Python modules or via a CGI approach in any language you want. The frontends shipped heavily focus on customizability.
 

@@ -1,0 +1,65 @@
+{
+	"backtrace" : 0,
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : 
+		[
+			"plugins/widgetboxmodel/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			}
+		]
+	},
+	"dependencies" : 
+	[
+		{
+			"backtrace" : 0,
+			"id" : "albert-lib::@6890427a1f51a3e7e1df"
+		}
+	],
+	"id" : "widgetboxmodel_autogen::@fff0be52a7d7487a9dff",
+	"isGeneratorProvided" : true,
+	"name" : "widgetboxmodel_autogen",
+	"paths" : 
+	{
+		"build" : "plugins/widgetboxmodel",
+		"source" : "plugins/widgetboxmodel"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "",
+			"sourceIndexes" : 
+			[
+				0
+			]
+		},
+		{
+			"name" : "CMake Rules",
+			"sourceIndexes" : 
+			[
+				1
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/plugins/widgetboxmodel/CMakeFiles/widgetboxmodel_autogen",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/plugins/widgetboxmodel/CMakeFiles/widgetboxmodel_autogen.rule",
+			"sourceGroupIndex" : 1
+		}
+	],
+	"type" : "UTILITY"
+}

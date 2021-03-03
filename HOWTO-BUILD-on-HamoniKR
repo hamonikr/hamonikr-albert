@@ -10,3 +10,14 @@ dpkg-buildpackage --sign-key=9FA298A1E42665B8
 
 # 설치 확인
 sudo dpkg -i ../*.deb
+
+
+# Compile on linuxmint 20.1 from UPSTREAM
+sudo apt-get install libqt5x11extras5-dev qtbase5-dev libmuparser-dev python3-dev
+
+git clone --recursive https://github.com/albertlauncher/albert.git
+mkdir albert-build
+cd albert-build
+cmake ../albert -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Debug
+make
+sudo make install

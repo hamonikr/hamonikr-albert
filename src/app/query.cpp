@@ -1,9 +1,7 @@
 // Copyright (C) 2014-2018 Manuel Schneider
 
-#include <QDebug>
 #include "albert/item.h"
 #include "albert/query.h"
-#include "matchcompare.h"
 
 
 /** ***************************************************************************/
@@ -23,6 +21,12 @@ bool Core::Query::isTriggered() const {
     return !trigger_.isNull();
 }
 
+/** ***************************************************************************/
+void Core::Query::disableSort()
+{
+    sort_ = false;
+}
+
 
 /** ***************************************************************************/
 const QString &Core::Query::trigger() const {
@@ -40,9 +44,9 @@ bool Core::Query::isValid() const {
 void Core::Query::addMatchWithoutLock(const std::shared_ptr<Core::Item> &item, uint score) {
     auto it = scores_.find(item->id());
     if ( it == scores_.end() )
-        results_.emplace_back(item, score/2);
+        results_.emplace_back(item, 0 /*score/2*/);
     else
-        results_.emplace_back(item, (static_cast<ulong>(score)+it->second)/2);
+        results_.emplace_back(item, it->second/*(static_cast<ulong>(score)+it->second)/2*/);
 }
 
 
@@ -50,7 +54,7 @@ void Core::Query::addMatchWithoutLock(const std::shared_ptr<Core::Item> &item, u
 void Core::Query::addMatchWithoutLock(std::shared_ptr<Core::Item> &&item, uint score) {
     auto it = scores_.find(item->id());
     if ( it == scores_.end() )
-        results_.emplace_back(std::move(item), score/2);
+        results_.emplace_back(std::move(item), 0/*score/2*/);
     else
-        results_.emplace_back(std::move(item), (static_cast<ulong>(score)+it->second)/2);
+        results_.emplace_back(std::move(item), it->second/*(static_cast<ulong>(score)+it->second)/2*/);
 }

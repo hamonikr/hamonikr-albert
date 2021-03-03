@@ -15,7 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QApplication>
-#include <QDebug>
 #include <QPointer>
 #include <QSettings>
 #include <chrono>
@@ -24,6 +23,11 @@
 #include "extension.h"
 #include "albert/query.h"
 #include "albert/util/standarditem.h"
+Q_LOGGING_CATEGORY(qlc, "debug")
+#define DEBG qCDebug(qlc,).noquote()
+#define INFO qCInfo(qlc,).noquote()
+#define WARN qCWarning(qlc,).noquote()
+#define CRIT qCCritical(qlc,).noquote()
 using Core::StandardItem;
 
 
@@ -67,7 +71,7 @@ Debug::Extension::~Extension() {
 QWidget *Debug::Extension::widget(QWidget *parent) {
     if (d->widget.isNull())
         d->widget = new ConfigWidget(this, parent);
-    return d->widget;
+    return d->widget.data();
 }
 
 
@@ -101,11 +105,10 @@ void Debug::Extension::handleQuery(Core::Query * query) const {
         if (!query->isValid())
             return;
 
-        auto item = std::make_shared<StandardItem>(QString::number(i));
-        item->setText(QString("Das Item #%1").arg(i));
-        item->setSubtext(QString("Toll, das Item #%1").arg(i));
-        item->setIconPath(":debug");
-        query->addMatch(std::move(item));
+        query->addMatch(makeStdItem(QString::number(i),
+                                    ":debug",
+                                    QString("Item #%1").arg(i),
+                                    QString("Wow, Item #%1").arg(i)));
     }
 }
 

@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 
-"""This extension adapts the AUR web interface. You can search for packages and open their URLs. \
-This extension is also intended to be used to quickly install the packages. Currently yaourt and \
-pacaur can be used. If you are missing your favorite AUR helper tool send a PR."""
+"""Query and install ArchLinux User Repository (AUR) packages.
 
-from albertv0 import *
+You can search for packages and open their URLs. This extension is also intended to be used to \
+quickly install the packages. If you are missing your favorite AUR helper tool send a PR.
+
+Synopsis: <trigger> <pkg_name>"""
+
+from albert import *
 from shutil import which
 from datetime import datetime
-from shlex import split
 from urllib import request, parse
 import json
 import os
 import re
 
-__iid__ = "PythonInterface/v0.1"
-__prettyname__ = "Archlinux User Repository"
-__version__ = "1.2"
-__trigger__ = "aur "
-__author__ = "Manuel Schneider"
-__dependencies__ = []
+__title__ = "Archlinux User Repository"
+__version__ = "0.4.3"
+__triggers__ = "aur "
+__authors__ = "manuelschneid3r"
 
 iconPath = os.path.dirname(__file__)+"/arch.svg"
 baseurl = 'https://aur.archlinux.org/rpc/'
@@ -28,11 +28,14 @@ if which("yaourt"):
     install_cmdline = "yaourt -S aur/%s"
 elif which("pacaur"):
     install_cmdline = "pacaur -S aur/%s"
-
+elif which("yay"):
+    install_cmdline = "yay -S aur/%s"
 
 def handleQuery(query):
     if not query.isTriggered:
         return
+
+    query.disableSort()
 
     stripped = query.string.strip()
 
@@ -50,11 +53,10 @@ def handleQuery(query):
             data = json.loads(response.read().decode())
             if data['type'] == "error":
                 return Item(
-                    id=__prettyname__,
+                    id=__title__,
                     icon=iconPath,
                     text="Error",
-                    subtext=data['error'],
-                    completion=query.rawString
+                    subtext=data['error']
                 )
             else:
                 results = []
@@ -66,10 +68,10 @@ def handleQuery(query):
                 for entry in results_json:
                     name = entry['Name']
                     item = Item(
-                        id=__prettyname__,
-                        icon=iconPath,
-                        text="<b>%s</b> <i>%s</i> (%s)" % (pattern.sub(lambda m: "<u>%s</u>" % m.group(0), name), entry['Version'], entry['NumVotes']),
-                        completion=query.rawString
+                        id = __title__,
+                        icon = iconPath,
+                        text = "<b>%s</b> <i>%s</i> (%s)" % (pattern.sub(lambda m: "<u>%s</u>" % m.group(0), name), entry['Version'], entry['NumVotes']),
+                        completion = "%s%s" % (__triggers__, name)
                     )
                     subtext = entry['Description'] if entry['Description'] else "[No description]"
                     if entry['OutOfDate']:
@@ -79,9 +81,11 @@ def handleQuery(query):
                     item.subtext = subtext
 
                     if install_cmdline:
-                        tokens = split(install_cmdline % name)
-                        item.addAction(TermAction("Install with %s" % tokens[0], tokens))
-                        item.addAction(TermAction("Install with %s (noconfirm)" % tokens[0], tokens + ["--noconfirm"]))
+                        pkgmgr = install_cmdline.split(" ", 1)
+                        item.actions = [
+                            TermAction("Install using %s" % pkgmgr[0], install_cmdline % name),
+                            TermAction("Install using %s (noconfirm)" % pkgmgr[0], install_cmdline % name + " --noconfirm")                        
+                        ]
 
                     item.addAction(UrlAction("Open AUR website", "https://aur.archlinux.org/packages/%s/" % name))
 
@@ -91,9 +95,8 @@ def handleQuery(query):
                     results.append(item)
                 return results
     else:
-        return Item(id=__prettyname__,
+        return Item(id=__title__,
                     icon=iconPath,
-                    text=__prettyname__,
+                    text=__title__,
                     subtext="Enter a query to search the AUR",
-                    completion=query.rawString,
                     actions=[UrlAction("Open AUR packages website", "https://aur.archlinux.org/packages/")])

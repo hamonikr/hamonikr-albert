@@ -1,0 +1,65 @@
+{
+	"backtrace" : 0,
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : 
+		[
+			"plugins/qmlboxmodel/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			}
+		]
+	},
+	"dependencies" : 
+	[
+		{
+			"backtrace" : 0,
+			"id" : "albert-lib::@6890427a1f51a3e7e1df"
+		}
+	],
+	"id" : "qmlboxmodel_autogen::@bc5f185630bda582a0d7",
+	"isGeneratorProvided" : true,
+	"name" : "qmlboxmodel_autogen",
+	"paths" : 
+	{
+		"build" : "plugins/qmlboxmodel",
+		"source" : "plugins/qmlboxmodel"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "",
+			"sourceIndexes" : 
+			[
+				0
+			]
+		},
+		{
+			"name" : "CMake Rules",
+			"sourceIndexes" : 
+			[
+				1
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/plugins/qmlboxmodel/CMakeFiles/qmlboxmodel_autogen",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/plugins/qmlboxmodel/CMakeFiles/qmlboxmodel_autogen.rule",
+			"sourceGroupIndex" : 1
+		}
+	],
+	"type" : "UTILITY"
+}

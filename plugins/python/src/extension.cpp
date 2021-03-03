@@ -11,6 +11,7 @@
 #include <QMutexLocker>
 #include <QPointer>
 #include <QStandardPaths>
+#include <QTableView>
 #include <QUrl>
 #include <memory>
 #include "xdg/iconlookup.h"
@@ -23,15 +24,14 @@
 #include "modulesmodel.h"
 #include "configwidget.h"
 #include "cast_specialization.h"
+Q_LOGGING_CATEGORY(qlc, "python")
+#define DEBG qCDebug(qlc,).noquote()
+#define INFO qCInfo(qlc,).noquote()
+#define WARN qCWarning(qlc,).noquote()
+#define CRIT qCCritical(qlc,).noquote()
 using namespace std;
 using namespace Core;
 namespace py = pybind11;
-
-Q_LOGGING_CATEGORY(qlc_python, "python")
-#define DEBUG qCDebug(qlc_python).noquote()
-#define INFO qCInfo(qlc_python).noquote()
-#define WARNING qCWarning(qlc_python).noquote()
-#define CRITICAL qCCritical(qlc_python).noquote()
 
 namespace Python {
 
@@ -44,21 +44,21 @@ const constexpr char* CFG_ENABLEDMODS = "enabled_modules";
 
 #include <pybind11/stl.h>
 
-PYBIND11_EMBEDDED_MODULE(albertv0, m)
+PYBIND11_EMBEDDED_MODULE(albert, m)
 {
     /*
-     * 0.1
+     * 0.4
      */
 
     m.doc() = "pybind11 example module";
 
-    py::class_<Core::Query, std::unique_ptr<Query, py::nodelete>>(m, "Query", "The query object to handle for a user input")
-            .def_property_readonly("string", &Query::string)
-            .def_property_readonly("rawString", &Query::rawString)
-            .def_property_readonly("trigger", &Query::trigger)
-            .def_property_readonly("isTriggered", &Query::isTriggered)
-            .def_property_readonly("isValid", &Query::isValid)
-            ;
+    py::class_<Core::Query, std::unique_ptr<Query, py::nodelete>> query(m, "Query", "The query object to handle for a user input");
+    query.def_property_readonly("string", &Query::string);
+    query.def_property_readonly("rawString", &Query::rawString);
+    query.def_property_readonly("trigger", &Query::trigger);
+    query.def_property_readonly("isTriggered", &Query::isTriggered);
+    query.def_property_readonly("isValid", &Query::isValid);
+    query.def("disableSort", &Query::disableSort);
 
     py::class_<Action, shared_ptr<Action>>(m, "ActionBase", "An abstract action")
             ;
@@ -70,51 +70,69 @@ PYBIND11_EMBEDDED_MODULE(albertv0, m)
      * has to be handled with care. The GIL has to be locked whenever the code is touched, i.e. on
      * execution and deletion. Further exceptions thrown from python have to be catched. */
     py::class_<FuncAction, Action, shared_ptr<FuncAction>>(m, "FuncAction", "Executes the callable")
-            .def(py::init([](QString text, const py::object& callable) {
-                return shared_ptr<FuncAction>(
-                    new FuncAction(move(text), [callable](){
-                        py::gil_scoped_acquire acquire;
-                        try{
-                            callable();
-                        } catch (exception &e) {
-                            WARNING << e.what();
+            .def(py::init(
+                [](QString text, const py::object& callable) {
+                    return shared_ptr<FuncAction>(
+
+                        new FuncAction(move(text), [callable](){
+                            py::gil_scoped_acquire acquire;
+                            try{
+                                callable();
+                            } catch (exception &e) {
+                                WARN << e.what();
+                            }
+                        }),
+
+                        [=](FuncAction *funcAction) {
+                            py::gil_scoped_acquire acquire;
+                            delete funcAction;
                         }
-                    }),
-                    [=](FuncAction *funcAction) {
-                        py::gil_scoped_acquire acquire;
-                        delete funcAction;
-                    }
-                );
-            }), py::arg("text"), py::arg("callable"))
+
+                    );
+                 }),
+            py::arg("text"),
+            py::arg("callable"))
             ;
 
     py::class_<ClipAction, Action, shared_ptr<ClipAction>>(m, "ClipAction", "Copies to clipboard")
-            .def(py::init<QString, QString>(), py::arg("text"), py::arg("clipboardText"))
+            .def(py::init<QString, QString>(),
+                 py::arg("text"),
+                 py::arg("clipboardText"))
             ;
 
     py::class_<UrlAction, Action, shared_ptr<UrlAction>>(m, "UrlAction", "Opens a URL")
-            .def(py::init<QString, QString>(), py::arg("text"), py::arg("url"))
+            .def(py::init<QString, QString>(),
+                 py::arg("text"),
+                 py::arg("url"))
             ;
 
     py::class_<ProcAction, Action, shared_ptr<ProcAction>>(m, "ProcAction", "Runs a process")
-            .def(py::init([](QString text, list<QString> commandline, QString workdir) {
-                return std::make_shared<ProcAction>(move(text), QStringList::fromStdList(commandline), move(workdir));
-            }), py::arg("text"), py::arg("commandline"), py::arg("cwd") = QString())
+            .def(py::init<QString, QStringList, QString>(),
+                 py::arg("text"),
+                 py::arg("commandline"),
+                 py::arg("cwd") = QString())
             ;
 
     py::class_<TermAction, Action, shared_ptr<TermAction>>pyTermAction(m, "TermAction", "Runs a command in terminal");
-
     py::enum_<TermAction::CloseBehavior>(pyTermAction, "CloseBehavior")
             .value("CloseOnSuccess", TermAction::CloseBehavior::CloseOnSuccess)
             .value("CloseOnExit", TermAction::CloseBehavior::CloseOnExit)
             .value("DoNotClose", TermAction::CloseBehavior::DoNotClose)
             .export_values()
             ;
-
-    pyTermAction.def(py::init([](QString text, list<QString> commandline, QString workdir, bool shell, TermAction::CloseBehavior behavior) {
-                return std::make_shared<TermAction>(move(text), QStringList::fromStdList(commandline), move(workdir), shell, behavior);
-            }), py::arg("text"), py::arg("commandline"), py::arg("cwd") = QString(), py::arg("shell") = true, py::arg("behavior") = TermAction::CloseBehavior::CloseOnSuccess)
+    pyTermAction.def(
+            py::init<QString, QStringList, QString>(),
+            py::arg("text"),
+            py::arg("commandline"),
+            py::arg("cwd") = QString())
             ;
+    pyTermAction.def(
+                py::init<QString, QString, TermAction::CloseBehavior, QString>(),
+                py::arg("text"),
+                py::arg("script"),
+                py::arg("behavior") = TermAction::CloseBehavior::CloseOnSuccess,
+                py::arg("cwd") = QString()
+            );
 
     py::enum_<Item::Urgency>(iitem, "Urgency")
             .value("Alert", Item::Urgency::Alert)
@@ -124,38 +142,39 @@ PYBIND11_EMBEDDED_MODULE(albertv0, m)
             ;
 
     py::class_<StandardItem, Item, shared_ptr<StandardItem>>(m, "Item", "A result item")
-            .def(py::init<QString,QString,QString,QString,QString,Item::Urgency,vector<shared_ptr<Action>>>(),
+            .def(py::init<QString, QString, QString, QString, ActionList, QString, Item::Urgency>(),
                  py::arg("id") = QString(),
                  py::arg("icon") = QString(":python_module"),
                  py::arg("text") = QString(),
                  py::arg("subtext") = QString(),
+                 py::arg("actions") = vector<shared_ptr<Action>>(),
                  py::arg("completion") = QString(),
-                 py::arg("urgency") = Item::Urgency::Normal,
-                 py::arg("actions") = vector<shared_ptr<Action>>())
+                 py::arg("urgency") = Item::Urgency::Normal
+            )
             .def_property("id", &StandardItem::id, &StandardItem::setId)
             .def_property("icon", &StandardItem::iconPath, &StandardItem::setIconPath)
             .def_property("text", &StandardItem::text, &StandardItem::setText)
             .def_property("subtext", &StandardItem::subtext, &StandardItem::setSubtext)
+            .def_property("actions", &StandardItem::actions, static_cast<void (StandardItem::*)(const ActionList&)>(&StandardItem::setActions))
             .def_property("completion", &StandardItem::completion, &StandardItem::setCompletion)
             .def_property("urgency", &StandardItem::urgency, &StandardItem::setUrgency)
             .def("addAction", static_cast<void (StandardItem::*)(const std::shared_ptr<Action> &)>(&StandardItem::addAction))
-            ;
+                ;
 
-    m.def("debug", [](const py::object &obj){ DEBUG << py::str(obj).cast<QString>(); });
-    m.def("info", [](const py::object &obj){ INFO << py::str(obj).cast<QString>(); });
-    m.def("warning", [](const py::object &obj){ WARNING << py::str(obj).cast<QString>(); });
-    m.def("critical", [](const py::object &obj){ CRITICAL << py::str(obj).cast<QString>(); });
+    m.def("debug",    [](const py::object &obj){ DEBG << py::str(obj).cast<QString>(); });
+    m.def("info",     [](const py::object &obj){ INFO << py::str(obj).cast<QString>(); });
+    m.def("warning",  [](const py::object &obj){ WARN << py::str(obj).cast<QString>(); });
+    m.def("critical", [](const py::object &obj){ CRIT << py::str(obj).cast<QString>(); });
 
-    m.def("iconLookup", [](const py::str &str){ return XDG::IconLookup::iconPath(str.cast<QString>()); });
+    m.def("iconLookup", static_cast<QString (*)(QStringList,QString)>(&XDG::IconLookup::iconPath),
+          py::arg("iconNames"), py::arg("themeName") = QString());
 
-    /*
-     * 0.2
-     */
+    m.def("iconLookup", static_cast<QString (*)(QString,QString)>(&XDG::IconLookup::iconPath),
+          py::arg("iconName"), py::arg("themeName") = QString());
 
     m.def("configLocation", [](){ return QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation); });
     m.def("dataLocation", [](){ return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation); });
     m.def("cacheLocation", [](){ return QStandardPaths::writableLocation(QStandardPaths::CacheLocation); });
-
 
 }
 
@@ -243,9 +262,9 @@ QWidget *Python::Extension::widget(QWidget *parent) {
 void Python::Extension::handleQuery(Core::Query *query) const {
     if ( query->isTriggered() ) {
         for ( auto & module : d->modules ) {
-            if ( d->enabledModules.contains(module->id())
+            if ( d->enabledModules.contains(module->id())  // TODO is this really necessary
                  && module->state() == PythonModuleV1::State::Loaded
-                 && module->trigger() == query->trigger() ) {
+                 && module->triggers().contains(query->trigger()) ) {
                 module->handleQuery(query);
                 return;
             }
@@ -268,7 +287,7 @@ void Python::Extension::handleQuery(Core::Query *query) const {
 QStringList Python::Extension::triggers() const {
     QStringList retval;
     for ( auto &module : d->modules )
-        retval << module->trigger();
+        retval << module->triggers();
     return retval;
 }
 
@@ -341,7 +360,7 @@ void Python::Extension::reloadModules() {
             d->modules.emplace_back(move(module));
 
         } catch (const std::exception &e) {
-            WARNING << e.what() << path;
+            WARN << e.what() << path;
         }
     }
 

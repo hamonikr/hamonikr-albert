@@ -1,0 +1,2 @@
+/bin/ar qc libglobalshortcut.a  CMakeFiles/globalshortcut.dir/globalshortcut_autogen/mocs_compilation.cpp.o CMakeFiles/globalshortcut.dir/src/hotkeymanager.cpp.o CMakeFiles/globalshortcut.dir/src/hotkeymanager_x11.cpp.o
+/bin/ranlib libglobalshortcut.a
