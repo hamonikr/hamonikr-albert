@@ -1,6 +1,6 @@
 albert (0.17.2-0hamonikr4) stable; urgency=low
 
-  * Change permission ~/.config/albert/*
+  * Change permission ~/.config/albert folder
    - root to user
 
  -- HamoniKR <pkg@hamonikr.org>  Thu, 04 Mar 2021 10:18:41 +0900
