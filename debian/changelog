@@ -1,3 +1,10 @@
+albert (0.17.2-0hamonikr3) stable; urgency=low
+
+  * Fixed bug hamonikr/etc/xdg/autostart/albert.desktop
+   - Autostart bug
+
+ -- HamoniKR <pkg@hamonikr.org>  Thu, 04 Mar 2021 10:10:00 +0900
+
 albert (0.17.2-0hamonikr2) stable; urgency=low
 
   * Add replace debian/control
