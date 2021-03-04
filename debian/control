@@ -24,6 +24,7 @@ Depends:
  libqt5sql5-sqlite,
  qml-module-qtgraphicaleffects,
  qml-module-qtquick-controls
+Replaces: hamonikr-system-settings 
 Description: A sophisticated, plugin-based, standalone keyboard launcher written in C++/Qt
  Albert is a unified and efficient access to your machine. Technically it is a keyboard launcher written in C++/Qt. The plugin based architecture makes it extremely flexible and powerful. Plugins can be used to create modular frontends or native extensions. Extensions can also be implemented using embedded Python modules or via a CGI approach in any language you want. The frontends shipped heavily focus on customizability.
 

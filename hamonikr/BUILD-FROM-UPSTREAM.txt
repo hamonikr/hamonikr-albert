@@ -1,0 +1,30 @@
+# 업스트림 소스 가져오기
+
+curl https://build.opensuse.org/projects/home:manuelschneid3r/public_key | sudo apt-key add -
+echo 'deb http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_20.04/ /' | sudo tee /etc/apt/sources.list.d/home:manuelschneid3r.list
+sudo wget -nv https://download.opensuse.org/repositories/home:manuelschneid3r/xUbuntu_20.04/Release.key -O "/etc/apt/trusted.gpg.d/home:manuelschneid3r.asc"
+sudo apt update
+sudo apt install albert
+
+apt source albert
+
+# 수정 반영
+hamonikr/*
+CMakeList.txt
+debian/*
+plugins/widgetboxmodel/share/themes/HamoniKR_Dark.qss
+plugins/widgetboxmodel/share/themes/HamoniKR_White.qss
+
+# 패키지 빌드
+sudo apt-get install libqt5x11extras5-dev qtbase5-dev libmuparser-dev python3-dev devscripts equivs debhelper
+
+# 빌드 의존 패키지 설치
+sudo mk-build-deps --install debian/control
+
+# 빌드
+dpkg-buildpackage -T clean
+dpkg-buildpackage --sign-key=9FA298A1E42665B8
+
+# 설치 확인
+sudo dpkg -i ../*.deb
+

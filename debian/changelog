@@ -1,3 +1,10 @@
+albert (0.17.2-0hamonikr2) stable; urgency=low
+
+  * Add replace debian/control
+   - for previous pkg user
+
+ -- HamoniKR <pkg@hamonikr.org>  Wed, 03 Mar 2021 18:11:28 +0900
+
 albert (0.17.2-0hamonikr1) stable; urgency=low
 
   * Release for HamoniKR Server 2.0
