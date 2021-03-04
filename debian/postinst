@@ -8,4 +8,5 @@ RUSER_UID=$(id -u ${RUID})
 if [[ ! -d "/home/$RUID/.config/albert" ]]
 then
     cp -r /etc/skel/.config/albert /home/$RUID/.config/ || true
+    chown -R $RUID:$RUID /home/$RUID/.config/albert/*|| true
 fi
