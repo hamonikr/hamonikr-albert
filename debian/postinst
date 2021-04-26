@@ -7,6 +7,13 @@ RUSER_UID=$(id -u ${RUID})
 
 if [[ ! -d "/home/$RUID/.config/albert" ]]
 then
+    echo "Copy settings"
     cp -r /etc/skel/.config/albert /home/$RUID/.config/ || true
     chown -R $RUID:$RUID /home/$RUID/.config/albert || true
+else
+    echo "Migrate previous settings"
+    rm -rf /home/$RUID/.config/albert
+    rm -rf /home/$RUID/.cache/albert
+    cp -rv /etc/skel/.config/albert /home/$RUID/.config/ || true
+    chown -R $RUID:$RUID /home/$RUID/.config/albert || true    
 fi
