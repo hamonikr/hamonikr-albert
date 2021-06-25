@@ -1,3 +1,9 @@
+albert (0.17.2-0hamonikr6) stable; urgency=low
+
+  * delete core.de file
+
+ -- HamoniKR <pkg@hamonikr.org>  Fri, 25 Jun 2021 19:33:42 +0900
+
 albert (0.17.2-0hamonikr5) stable; urgency=low
 
   * Fix https://github.com/hamonikr/hamonikr-albert/issues/1
