@@ -1,3 +1,9 @@
+albert (0.17.2-0hamonikr7) stable; urgency=low
+
+  * old file in last package & other package /etc/skel/.config/albert/core.db
+
+ -- HamoniKR <pkg@hamonikr.org>  Mon, 28 Jun 2021 11:09:43 +0900
+
 albert (0.17.2-0hamonikr6) stable; urgency=low
 
   * delete core.de file

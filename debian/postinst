@@ -5,6 +5,12 @@ RUID=$(who | awk 'FNR == 1 {print $1}')
 # Translate Real Username to Real User ID
 RUSER_UID=$(id -u ${RUID})
 
+if [[ -f "/etc/skel/.config/albert/core.db" ]]
+    then
+        echo "Old File : Delete core.db"
+        rm -rf /etc/skel/.config/albert/core.db
+fi
+
 if [[ ! -d "/home/$RUID/.config/albert" ]]
 then
     echo "Copy settings"
