@@ -1,1 +1,0 @@
-/bin/x86_64-linux-gnu-g++-9 -fPIC  -Wall -Wextra -pedantic -g -DQT_QML_DEBUG  -shared -Wl,-soname,libxdg.so -o ../libxdg.so CMakeFiles/xdg.dir/xdg_autogen/mocs_compilation.cpp.o CMakeFiles/xdg.dir/src/iconlookup.cpp.o CMakeFiles/xdg.dir/src/themefileparser.cpp.o  /usr/lib/x86_64-linux-gnu/libQt5Gui.so.5.12.8 /usr/lib/x86_64-linux-gnu/libQt5Core.so.5.12.8 

@@ -1,3 +1,10 @@
+albert (0.17.2-0hamonikr8) stable; urgency=low
+
+  * Add new theme plugins/widgetboxmodel/share/themes/Hanla.qss
+   - Update for HamoniKR Hanla 
+
+ -- HamoniKR <pkg@hamonikr.org>  Mon, 12 Jul 2021 17:26:37 +0900
+
 albert (0.17.2-0hamonikr7) stable; urgency=low
 
   * old file in last package & other package /etc/skel/.config/albert/core.db
@@ -6,7 +13,7 @@ albert (0.17.2-0hamonikr7) stable; urgency=low
 
 albert (0.17.2-0hamonikr6) stable; urgency=low
 
-  * delete core.de file
+  * delete core.db file
 
  -- HamoniKR <pkg@hamonikr.org>  Fri, 25 Jun 2021 19:33:42 +0900
 
