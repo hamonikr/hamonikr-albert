@@ -1,3 +1,9 @@
+albert (0.17.2-0hamonikr9) stable; urgency=low
+
+  * Add websearch extension
+
+ -- HamoniKR <pkg@hamonikr.org>  Mon, 12 Jul 2021 17:26:37 +0900
+
 albert (0.17.2-0hamonikr8) stable; urgency=low
 
   * Add new theme plugins/widgetboxmodel/share/themes/Hanla.qss
