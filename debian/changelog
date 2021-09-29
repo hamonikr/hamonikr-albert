@@ -1,3 +1,10 @@
+albert (0.17.2-0hamonikr10) stable; urgency=low
+
+  * Desktop file name change
+    - 런처 > Albert 런처
+
+ -- HamoniKR <pkg@hamonikr.org>  Wed, 29 Sep 2021 16:37:50 +0900
+
 albert (0.17.2-0hamonikr9) stable; urgency=low
 
   * Add websearch extension
