@@ -11,15 +11,18 @@ if [[ -f "/etc/skel/.config/albert/core.db" ]]
         rm -rf /etc/skel/.config/albert/core.db
 fi
 
-if [[ ! -d "/home/$RUID/.config/albert" ]]
-then
-    echo "Copy settings"
-    cp -r /etc/skel/.config/albert /home/$RUID/.config/ || true
-    chown -R $RUID:$RUID /home/$RUID/.config/albert || true
-else
-    echo "Migrate previous settings"
-    rm -rf /home/$RUID/.config/albert
-    rm -rf /home/$RUID/.cache/albert
-    cp -rv /etc/skel/.config/albert /home/$RUID/.config/ || true
-    chown -R $RUID:$RUID /home/$RUID/.config/albert || true    
+# RUID check
+if [[ "$RUID" != "" ]]; then
+    if [[ ! -d "/home/$RUID/.config/albert" ]]
+    then
+        echo "Copy settings"
+        cp -r /etc/skel/.config/albert /home/$RUID/.config/ || true
+        chown -R $RUID:$RUID /home/$RUID/.config/albert || true
+    else
+        echo "Migrate previous settings"
+        rm -rf /home/$RUID/.config/albert
+        rm -rf /home/$RUID/.cache/albert
+        cp -rv /etc/skel/.config/albert /home/$RUID/.config/ || true
+        chown -R $RUID:$RUID /home/$RUID/.config/albert || true    
+    fi
 fi
