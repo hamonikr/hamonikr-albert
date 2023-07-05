@@ -1,3 +1,11 @@
+albert (0.17.4) stable; urgency=medium
+
+  * Build on HamoniKR kumkang
+  * Add new theme as kumkang
+  * Add extensions (calculator, terminal, files)
+
+ -- HamoniKR <pkg@hamonikr.org>  Wed, 05 Jul 2023 16:14:53 +0900
+
 albert (0.17.3) taebaek; urgency=low
 
   * Build on LDME 5
