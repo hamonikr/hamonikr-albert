@@ -1,3 +1,10 @@
+albert (0.17.5) stable; urgency=medium
+
+  * Release for HamoniKR 7.0 
+   - Change theme
+
+ -- HamoniKR <pkg@hamonikr.org>  Wed, 27 Sep 2023 11:33:04 +0900
+
 albert (0.17.4) stable; urgency=medium
 
   * Build on HamoniKR kumkang

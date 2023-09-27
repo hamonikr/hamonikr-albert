@@ -9,18 +9,18 @@
  */
 
 * {
-	font-family: "Nanum Gothic", "Nanum Gothic Coding", "Noto Sans KR", "Open Sans";
+	font-family: "Pretendard", "Nanum Gothic", "Nanum Gothic Coding", "Noto Sans KR", "Open Sans";
 	src: url("https://fonts.googleapis.com/css2?family=Nanum+Gothic|Nanum+Gothic+Coding|Noto+Sans+KR|Open+Sans");
 	font-weight: 400;
     border: none;
-    color : #000000;
+    color: #bfd1d1d1;
     background-color: #bf8a8a8a;
 }
 
 #frame {
-    padding: 2px 15px;
-    border-radius: 15px;
-    background-color: #bf8a8a8a;
+    padding: 15px 15px;
+    border-radius: 25px;
+    background-color: #BF252525;
     min-width:700px;
     max-width:700px;
 }
@@ -28,15 +28,14 @@
 #inputLine {
     padding: 2px 15px;
     font-size: 24px;
-    selection-color: #8cbfda;
-    selection-background-color: #bf8a8a8a;
+    selection-color: #030303;
+    selection-background-color: #808080;
     background-color: transparent;
-
 }
 
 #settingsButton {
     margin: 6px 6px 0px 0px;
-    color: #BF252525;
+    color: #bfd1d1d1;
     background-color: transparent;
     padding: 2px;
     min-width:15px;
@@ -54,7 +53,7 @@ QListView {
 }
 
 QListView::item:selected {
-    background: #BF252525;
+    background: #0767c8;
     border-radius: 10px;
     padding: 2px 2px 2px 2px;
 }
@@ -83,17 +82,16 @@ QListView QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
 
 QListView#resultsList {
     icon-size: 40px;
-    font-size: 16px;
+    font-size: 14px;
     padding: 5px 5px 5px 5px;
 }
 
 QListView#resultsList::item{
     padding: 8px 10px 10px 0px;
-    margin: 1px;
 }
 
 /********** actionList **********/
 
 QListView#actionList {
-    font-size: 18px;
+    font-size: 20px;
 }
