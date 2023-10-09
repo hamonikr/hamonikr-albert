@@ -1,3 +1,10 @@
+albert (0.17.6) stable; urgency=medium
+
+  * Release for HamoniKR 7.0 
+   - Fixed shortcut as Alt+Space
+
+ -- HamoniKR <pkg@hamonikr.org>  Mon, 09 Oct 2023 18:32:08 +0900
+
 albert (0.17.5) stable; urgency=medium
 
   * Release for HamoniKR 7.0 
