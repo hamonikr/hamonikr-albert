@@ -130,6 +130,7 @@ WidgetBoxModel::FrontendWidget::FrontendWidget(QSettings *settings) : d(new Priv
     connect(action, &QAction::triggered, this, &FrontendWidget::settingsWidgetRequested);
     connect(d->settingsButton_, &QPushButton::clicked, action, &QAction::trigger);
     d->settingsButton_->addAction(action);
+    d->ui.inputLine->QWidget::setAttribute(Qt::WA_InputMethodEnabled, true);
 
     action = new QAction("Hide", d->settingsButton_);
     action->setShortcut(QKeySequence("Esc"));
@@ -535,6 +536,13 @@ bool WidgetBoxModel::FrontendWidget::eventFilter(QObject *, QEvent *event) {
     if ( event->type() == QEvent::FocusOut )
         if (d->hideOnFocusLoss_)
             hide();
+
+    QString currentQuery = d->ui.inputLine->text();
+    if(event->type() == QEvent::InputMethod) {
+        QInputMethodEvent * keyEvent = static_cast<QInputMethodEvent*>(event);
+        QString s = keyEvent->preeditString();
+        d->ui.inputLine->textChanged(currentQuery + s);
+    }
 
     if ( event->type() == QEvent::KeyPress ) {
         QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);

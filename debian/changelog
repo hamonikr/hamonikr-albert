@@ -1,3 +1,13 @@
+albert (0.17.6+h1) stable; urgency=medium
+
+  * Patched last letter bug when inputting Korean #5
+   - https://github.com/albertlauncher/albert/issues/1130
+   - https://github.com/hamonikr/hamonikr-albert/issues/5
+  * Changed application plugin default value to true 
+   - use_keywords, use_generic_name need for Korean
+
+ -- HamoniKR <pkg@hamonikr.org>  Sun, 24 Dec 2023 21:46:20 +0900
+
 albert (0.17.6) stable; urgency=medium
 
   * Release for HamoniKR 7.0 

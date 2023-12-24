@@ -40,9 +40,9 @@ const bool  DEF_FUZZY                = false;
 const char* CFG_IGNORESHOWINKEYS     = "ignore_show_in_keys";
 const bool  DEF_IGNORESHOWINKEYS     = false;
 const char* CFG_USEKEYWORDS          = "use_keywords";
-const bool  DEF_USEKEYWORDS          = false;
+const bool  DEF_USEKEYWORDS          = true;
 const char* CFG_USEGENERICNAME       = "use_generic_name";
-const bool  DEF_USEGENERICNAME       = false;
+const bool  DEF_USEGENERICNAME       = true;
 const char* CFG_USENONLOCALIZEDNAME  = "use_non_localized_name";
 const bool  DEF_USENONLOCALIZEDNAME  = false;
 
