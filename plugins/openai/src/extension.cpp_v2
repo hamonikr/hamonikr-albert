@@ -198,3 +198,4 @@ void Extension::handleQuery(Core::Query *query) const {
 } // namespace OpenAI
 
 #include "extension.moc"
+

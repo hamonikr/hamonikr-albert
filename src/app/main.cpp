@@ -605,7 +605,8 @@ static void printReport()
 {
     const uint8_t w = 22;
     INFO << QString("%1: %2").arg("Albert version", w).arg(qApp->applicationVersion());
-    INFO << QString("%1: %2").arg("Build date", w).arg(__DATE__ " " __TIME__);
+    // INFO << QString("%1: %2").arg("Build date", w).arg(__DATE__ " " __TIME__);
+    INFO << QString("%1: %2").arg("Build date", w).arg(QStringLiteral("Date not included"));
 
     INFO << QString("%1: %2").arg("Qt version", w).arg(qVersion());
     INFO << QString("%1: %2").arg("QT_QPA_PLATFORMTHEME", w).arg(QString::fromLocal8Bit(qgetenv("QT_QPA_PLATFORMTHEME")));

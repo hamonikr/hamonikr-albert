@@ -4,7 +4,7 @@
 #include <QLoggingCategory>
 #include <QObject>
 #include <memory>
-#include <QtNetwork/QNetworkAccessManager>  // 추가된 부분
+#include <QtNetwork/QNetworkAccessManager>
 #include "albert/extension.h"
 #include "albert/queryhandler.h"
 Q_DECLARE_LOGGING_CATEGORY(qlc)
@@ -24,14 +24,13 @@ public:
     QString name() const override { return "OpenAI"; }
     QWidget *widget(QWidget *parent = nullptr) override;
     QStringList triggers() const override { return {"ai>"}; }
-    void handleQuery(Core::Query * query) const override;
+    void handleQuery(Core::Query *query) const override;
 
 private:
 
     class Private;
     std::unique_ptr<Private> d;
-    QNetworkAccessManager *networkManager;
-
+    mutable Core::Query *currentQuery;  // 현재 Query를 저장하기 위한 멤버 변수
 };
-}
 
+}

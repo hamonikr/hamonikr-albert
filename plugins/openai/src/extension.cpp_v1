@@ -1,5 +1,4 @@
-// QPointer를 제거하고 일반 포인터를 사용합니다.
-// 타이머를 직접 관리하여 올바른 스레드에서 동작하도록 합니다.
+// 이 버전은 검색창에  API 응답결과가 업데이트 되지 않고 있음
 
 #include <QDirIterator>
 #include <QFileInfo>
@@ -198,3 +197,4 @@ void Extension::handleQuery(Core::Query *query) const {
 } // namespace OpenAI
 
 #include "extension.moc"
+

@@ -13,7 +13,7 @@ class ConfigWidget final : public QWidget
 
 public:
 
-    ConfigWidget(MainWindow *mainWindow, QWidget * parent = 0, Qt::WindowFlags f = 0);
+    ConfigWidget(MainWindow *mainWindow, QWidget *parent = nullptr, Qt::WindowFlags f = {});
 
 private:
 
