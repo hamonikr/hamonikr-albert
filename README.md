@@ -24,35 +24,18 @@ sudo apt install albert
 * [HamoniKR Community](https://hamonikr.org/)
 
 
-# TO-DO
+# gpt plugin
 
 ![gpt_plugin](./gpt_plugin.png)
 
- * GPT 질문응답 플러그인을 개발했지만, OpenAI 의 API 응답이 제댈로 오지않는 버그로 중단
+* OpenAI API 키를 설정하면 GTP 와 채팅을 할 수 있는 플러그인
+* 설정 파일 `~/.config/albert/albert.conf` 의 내용 중 아래 부분을 자신이 사용 가능한 API 키로 변경
 
- * 해결되었다고 OpenAI 에서 응답했지만 여전히 동일한 현상
- * https://community.openai.com/t/probable-openai-bug-insufficient-quota-error-on-paid-account-with-available-balance/331067
-
-```
-# 요청 테스트
-curl https://api.openai.com/v1/chat/completions \                                                                                                            
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <API_KEY>" \
-  -d '{
-    "model": "gpt-3.5-turbo",
-    "messages": [{"role": "user", "content": "Say this is a test"}],
-    "max_tokens": 10
-  }'
-```
-```
-# 응답
-{
-    "error": {
-        "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.",
-        "type": "insufficient_quota",
-        "param": null,
-        "code": "insufficient_quota"
-    }
-}
+openai_api_key=YOUR_OPENAI_API_KEY
 
 ```
+openai_api_key=OpenAI 에서 발급 받은 API 키
+
+```
+이미지와 같이 입력창에 ai> 프롬프트 를 입력하면 응답이 아래에 보인다.
+

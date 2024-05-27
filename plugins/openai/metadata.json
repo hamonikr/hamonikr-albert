@@ -1,9 +1,0 @@
-{
-    "id": "org.albert.extension.openai",
-    "name": "OpenAI",
-    "version": "1.0",
-    "author": "Kevin Kim",
-    "dependencies": {
-      "network": ">=5.15"
-    }
-}
