@@ -214,7 +214,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD
     install(FILES dist/xdg/albert.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications )
     install(FILES resources/albert.svg DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps)
     # Add HamoniKR Default Settings
-    # install(DIRECTORY "hamonikr/etc/" DESTINATION ${CMAKE_INSTALL_SYSCONFDIR})
+    install(DIRECTORY "hamonikr/etc/" DESTINATION ${CMAKE_INSTALL_SYSCONFDIR})
 
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
