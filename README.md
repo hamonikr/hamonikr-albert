@@ -18,6 +18,14 @@ wget -qO- https://pkg.hamonikr.org/add-hamonikr.apt | sudo -E bash -
 sudo apt install albert
 ```
 
+# Build from source
+```
+git clone --recursive https://github.com/hamonikr/hamonikr-albert.git
+cmake -B build -S hamonikr-albert -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+cmake --install build
+```
+
 # Support
 
 * [HamoniKR Community](https://hamonikr.org/)
