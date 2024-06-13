@@ -12,4 +12,4 @@ X-GNOME-Autostart-enabled=true
 Hidden=false
 Name[ko_KR]=런처
 Comment[ko_KR]=시스템 런처
-X-GNOME-Autostart-Delay=0
+X-GNOME-Autostart-Delay=5

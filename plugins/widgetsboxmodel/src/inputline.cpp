@@ -69,7 +69,14 @@ void InputLine::paintEvent(QPaintEvent *event)
 
         auto fm = fontMetrics();
         auto r = content_rect;
-        r.adjust(fm.horizontalAdvance(text()), 0, 0, 0);
+
+        // Get cursor position in pixels - Change so that hint text does not overlap even in the case of combined letters
+        int cursor_pos = cursorRect().right();
+        
+        // Add offset to avoid overlap
+        int offset = 5;
+        r.setLeft(cursor_pos + offset);
+
         auto t = fm.elidedText(hint, Qt::ElideRight, r.width());
 
         p.drawText(r, Qt::TextSingleLine, t);
