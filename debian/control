@@ -3,16 +3,27 @@ Maintainer: Manuel Schneider <manuelschneid3r@gmail.com>
 Section: utils
 Priority: optional
 Standards-Version: 4.1.0
-Build-Depends: 
-	debhelper (>=10),
-	cmake (>=3.1.3),
-	qtbase5-dev (>=5.5),
-	libqt5x11extras5-dev (>=5.5),
-	libqt5svg5-dev (>=5.5),
-	qtdeclarative5-dev (>=5.5),
-	libmuparser-dev (>=2),
-	python3-dev (>=3.5),
-	lsb-release
+# libgl1-mesa-dev libglvnd-dev see https://forum.qt.io/topic/121929/qt6-android-cmake-project-fails-at-start-failed-to-find-qt-component-core-config-file-at/9
+Build-Depends:
+    cmake (>=3.19),
+    debhelper (>=10),
+    libarchive-dev,
+    libgl1-mesa-dev,
+    libglvnd-dev,
+    libmuparser-dev (>=2),
+    libqalculate-dev,
+    libqt6opengl6-dev,
+    libqt6svg6-dev,
+    lsb-release,
+    pkg-config | pkgconf,
+    pybind11-dev,
+    python3-dev (>=3.7),
+    qt6-base-dev,
+    qt6-declarative-dev,
+    qt6-l10n-tools,
+    qt6-scxml-dev,
+    qt6-tools-dev,
+    qt6-tools-dev-tools
 Homepage: https://albertlauncher.github.io/
 Vcs-Browser: https://github.com/albertlauncher
 Vcs-Git: https://github.com/albertlauncher/albert.git
@@ -21,10 +32,19 @@ Package: albert
 Architecture: any
 Depends:
  ${shlibs:Depends},
- libqt5sql5-sqlite,
- qml-module-qtgraphicaleffects,
- qml-module-qtquick-controls
-Replaces: hamonikr-system-settings 
-Description: A sophisticated, plugin-based, standalone keyboard launcher written in C++/Qt
- Albert is a unified and efficient access to your machine. Technically it is a keyboard launcher written in C++/Qt. The plugin based architecture makes it extremely flexible and powerful. Plugins can be used to create modular frontends or native extensions. Extensions can also be implemented using embedded Python modules or via a CGI approach in any language you want. The frontends shipped heavily focus on customizability.
+ libqt6sql6-sqlite,
+ python3-pip,
+ qml6-module-qt5compat-graphicaleffects,
+ qml6-module-qtqml-statemachine,
+ qml6-module-qtqml-workerscript,
+ qml6-module-qtquick-shapes,
+ qml6-module-qtquick-window,
+ qt6-qpa-plugins,
+ qt6-wayland
+Recommends:
+ libqalculate22,
+ libmuparser2v5
+Description: Plugin-based C++/Qt keyboard launcher
+ Albert is a desktop agnostic keyboard launcher that helps you to accomplish your workflows in a breeze.
+
 

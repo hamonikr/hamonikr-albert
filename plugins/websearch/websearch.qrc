@@ -2,13 +2,16 @@
     <qresource prefix="/">
         <file alias="amazon">resources/amazon.svg</file>
         <file alias="default">resources/default.svg</file>
-        <file alias="naver">resources/naver.svg</file>        
-        <file alias="ebay">resources/ebay.svg</file>
-        <file alias="google">resources/google.svg</file>
-        <file alias="youtube">resources/youtube.svg</file>
-        <file alias="github">resources/octocat.svg</file>
-        <file alias="wikipedia">resources/wikipedia.svg</file>
-        <file alias="wolfram">resources/wolfram.png</file>
+        <file alias="naver">resources/naver.svg</file>
         <file alias="duckduckgo">resources/duckduckgo.svg</file>
+        <file alias="ebay">resources/ebay.svg</file>
+        <file alias="github">resources/github.svg</file>
+        <file alias="google">resources/google.svg</file>
+        <file alias="maps">resources/maps.svg</file>
+        <file alias="wolfram">resources/wolfram.svg</file>
+        <file alias="youtube">resources/youtube.svg</file>
+        <file alias="scholar">resources/scholar.svg</file>
+        <file alias="engines.json">resources/engines.json</file>
+        <file alias="google_translate">resources/google_translate.svg</file>
     </qresource>
 </RCC>

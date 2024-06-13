@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Websearch::SearchEngineEditor</class>
- <widget class="QDialog" name="Websearch::SearchEngineEditor">
+ <class>SearchEngineEditor</class>
+ <widget class="QDialog" name="SearchEngineEditor">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>420</width>
+    <width>600</width>
     <height>320</height>
    </rect>
   </property>
@@ -21,8 +21,8 @@
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>20</width>
-       <height>40</height>
+       <width>0</width>
+       <height>0</height>
       </size>
      </property>
     </spacer>
@@ -36,8 +36,8 @@
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>40</width>
-         <height>20</height>
+         <width>0</width>
+         <height>0</height>
         </size>
        </property>
       </spacer>
@@ -56,17 +56,18 @@
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+      <widget class="QLabel" name="label_iconhint">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
+       <property name="text">
+        <string>Click to select file
+or drop an image.</string>
        </property>
-      </spacer>
+      </widget>
      </item>
     </layout>
    </item>
@@ -77,14 +78,17 @@
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>20</width>
-       <height>40</height>
+       <width>0</width>
+       <height>0</height>
       </size>
      </property>
     </spacer>
    </item>
    <item>
     <layout class="QFormLayout" name="formLayout">
+     <property name="fieldGrowthPolicy">
+      <enum>QFormLayout::ExpandingFieldsGrow</enum>
+     </property>
      <item row="0" column="0">
       <widget class="QLabel" name="nameLabel">
        <property name="text">
@@ -98,24 +102,24 @@
         <string>Name of the search engine.</string>
        </property>
        <property name="placeholderText">
-        <string>Name of the search engine</string>
+        <string>Name of the search engine.</string>
        </property>
       </widget>
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="triggerLabel">
        <property name="text">
-        <string>Trigger:</string>
+        <string>Short:</string>
        </property>
       </widget>
      </item>
      <item row="1" column="1">
       <widget class="QLineEdit" name="lineEdit_trigger">
        <property name="toolTip">
-        <string>The query prefix that triggers this engine. Note that it may make sense to append a space to the trigger prefix.</string>
+        <string>Short name you can utilize for quick access.</string>
        </property>
        <property name="placeholderText">
-        <string>The query prefix that triggers this engine</string>
+        <string>Short name you can utilize for quick access.</string>
        </property>
       </widget>
      </item>
@@ -132,11 +136,24 @@
         <string>The URL containing a %s that will be replaced by the query.</string>
        </property>
        <property name="placeholderText">
-        <string>The URL containing a %s that will be replaced by the query</string>
+        <string>The URL containing a %s that will be replaced by the query.</string>
        </property>
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <spacer name="verticalSpacer_3">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
@@ -161,7 +178,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>Websearch::SearchEngineEditor</receiver>
+   <receiver>SearchEngineEditor</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -177,7 +194,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>Websearch::SearchEngineEditor</receiver>
+   <receiver>SearchEngineEditor</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

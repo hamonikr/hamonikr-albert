@@ -1,21 +1,16 @@
-cmake_minimum_required(VERSION 3.1.3)
+#if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
 
-project(mpris)
+project(mpris VERSION 3.0)
 
-file(GLOB_RECURSE SRC src/*)
+find_package(Qt6 REQUIRED COMPONENTS DBus)
 
-find_package(Qt5 5.5.0 REQUIRED COMPONENTS Widgets DBus)
-
-add_library(${PROJECT_NAME} SHARED ${SRC} ${PROJECT_NAME}.qrc metadata.json)
-
-target_include_directories(${PROJECT_NAME} PRIVATE src/)
-
-target_link_libraries(${PROJECT_NAME}
-    PRIVATE
-        Qt5::DBus
-        Qt5::Widgets
-        albert::lib
-        xdg
+albert_plugin(
+    SOURCE_FILES
+        src/configwidget.ui
+        src/plugin.cpp
+        src/plugin.h
+    PRIVATE_LINK_LIBRARIES
+        Qt6::DBus
 )
 
-install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/albert/plugins)
+#endif()

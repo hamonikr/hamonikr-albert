@@ -1,150 +1,21 @@
-albert (0.17.6+h1) stable; urgency=medium
+albert (0.23.0-0+612.1h1) noble; urgency=medium
 
-  * Patched last letter bug when inputting Korean #5
-   - https://github.com/albertlauncher/albert/issues/1130
-   - https://github.com/hamonikr/hamonikr-albert/issues/5
-  * Changed application plugin default value to true 
-   - use_keywords, use_generic_name need for Korean
+  * Release for ubuntu 24.04
+   - Update from latest upstream v0.23
+   - Add shortcut help
+   - Add Korean translation
+   - Fixed autostart albert in ubuntu 24.04
 
- -- HamoniKR <pkg@hamonikr.org>  Sun, 24 Dec 2023 21:46:20 +0900
+ -- HamoniKR <pkg@hamonikr.org>  Wed, 12 Jun 2024 22:51:47 +0900
 
-albert (0.17.6) stable; urgency=medium
-
-  * Release for HamoniKR 7.0 
-   - Fixed shortcut as Alt+Space
-
- -- HamoniKR <pkg@hamonikr.org>  Mon, 09 Oct 2023 18:32:08 +0900
-
-albert (0.17.5) stable; urgency=medium
-
-  * Release for HamoniKR 7.0 
-   - Change theme
-
- -- HamoniKR <pkg@hamonikr.org>  Wed, 27 Sep 2023 11:33:04 +0900
-
-albert (0.17.4) stable; urgency=medium
-
-  * Build on HamoniKR kumkang
-  * Add new theme as kumkang
-  * Add extensions (calculator, terminal, files)
-
- -- HamoniKR <pkg@hamonikr.org>  Wed, 05 Jul 2023 16:14:53 +0900
-
-albert (0.17.3) taebaek; urgency=low
-
-  * Build on LDME 5
-
- -- HamoniKR <pkg@hamonikr.org>  Fri, 18 Nov 2022 18:24:45 +0900
-
-albert (0.17.2-0hamonikr12) taebaek; urgency=low
-
-  * Changed application icon for HamoniKR 6.0 applet
-
- -- HamoniKR <pkg@hamonikr.org>  Tue, 25 Oct 2022 00:13:53 +0900
-
-albert (0.17.2-0hamonikr11) stable; urgency=low
-
-  * Bug Fixed
-   - If you installed it without a user account, the /home/.config folder is created.
-
- -- HamoniKR <pkg@hamonikr.org>  Tue, 05 Oct 2021 14:36:32 +0900
-
-albert (0.17.2-0hamonikr10) stable; urgency=low
-
-  * Desktop file name change
-    - 런처 > Albert 런처
-
- -- HamoniKR <pkg@hamonikr.org>  Wed, 29 Sep 2021 16:37:50 +0900
-
-albert (0.17.2-0hamonikr9) stable; urgency=low
-
-  * Add websearch extension
-
- -- HamoniKR <pkg@hamonikr.org>  Mon, 12 Jul 2021 17:26:37 +0900
-
-albert (0.17.2-0hamonikr8) stable; urgency=low
-
-  * Add new theme plugins/widgetboxmodel/share/themes/Hanla.qss
-   - Update for HamoniKR Hanla 
-
- -- HamoniKR <pkg@hamonikr.org>  Mon, 12 Jul 2021 17:26:37 +0900
-
-albert (0.17.2-0hamonikr7) stable; urgency=low
-
-  * old file in last package & other package /etc/skel/.config/albert/core.db
-
- -- HamoniKR <pkg@hamonikr.org>  Mon, 28 Jun 2021 11:09:43 +0900
-
-albert (0.17.2-0hamonikr6) stable; urgency=low
-
-  * delete core.db file
-
- -- HamoniKR <pkg@hamonikr.org>  Fri, 25 Jun 2021 19:33:42 +0900
-
-albert (0.17.2-0hamonikr5) stable; urgency=low
-
-  * Fix https://github.com/hamonikr/hamonikr-albert/issues/1
-   - crash with previous version
-
- -- HamoniKR <pkg@hamonikr.org>  Thu, 04 Mar 2021 10:18:41 +0900
-
-albert (0.17.2-0hamonikr4) stable; urgency=low
-
-  * Change permission ~/.config/albert folder
-   - root to user
-
- -- HamoniKR <pkg@hamonikr.org>  Thu, 04 Mar 2021 10:18:41 +0900
-
-albert (0.17.2-0hamonikr3) stable; urgency=low
-
-  * Fixed bug hamonikr/etc/xdg/autostart/albert.desktop
-   - Autostart bug
-
- -- HamoniKR <pkg@hamonikr.org>  Thu, 04 Mar 2021 10:10:00 +0900
-
-albert (0.17.2-0hamonikr2) stable; urgency=low
-
-  * Add replace debian/control
-   - for previous pkg user
-
- -- HamoniKR <pkg@hamonikr.org>  Wed, 03 Mar 2021 18:11:28 +0900
-
-albert (0.17.2-0hamonikr1) stable; urgency=low
-
-  * Release for HamoniKR Server 2.0
-   - Update UPSTREAM src
-
- -- HamoniKR <pkg@hamonikr.org>  Wed, 03 Mar 2021 15:44:31 +0900
-
-albert (0.17.2-0) stable; urgency=low
-
-  * Albert Upstream Release
-  
- -- Manuel Schneider <manuelschneid3r@gmail.com>  Sun, 29 Oct 2017 00:00:00 +0000
-
-albert (0.16.1hamonikr2) stable; urgency=low
-
-  * Update plugins/widgetboxmodel/share/themes/HamoniKR_Dark.qss
-   - Fixed theme padding size for HamoniKR
-
- -- HamoniKR <pkg@hamonikr.org>  Mon, 16 Nov 2020 15:10:57 +0900
-
-albert (0.16.1hamonikr1) stable; urgency=low
-
-  * rebuild for hamonikr 4.0
-   - added theme for hamonikr 4.0 jin
-   - add korean application name in desktop file
-
- -- HamoniKR <pkg@hamonikr.org>  Wed, 28 Oct 2020 16:38:31 +0900
-
-albert (0.16.1) stable; urgency=low
+albert (0.23.0-0+612.1) stable; urgency=low
 
   * version number update by debtransform
 
- -- debtransform <build@opensuse.org>  Sat, 13 Jun 2020 13:10:17 +0000
+ -- debtransform <build@opensuse.org>  Thu, 23 May 2024 11:15:22 +0000
 
-albert (0.16.1-0) stable; urgency=low
+albert (0.23.0-0) stable; urgency=low
 
-  * Albert Upstream Release
-  
+  * See https://raw.githubusercontent.com/albertlauncher/albert/master/CHANGELOG.md
+
  -- Manuel Schneider <manuelschneid3r@gmail.com>  Sun, 29 Oct 2017 00:00:00 +0000

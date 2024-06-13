@@ -1,0 +1,191 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ "master" ]
+    tags: 'v*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  Release:
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout recursive
+        uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+          path: albert
+          
+      - name: Create archives
+        run: |
+          tar --exclude=".*" -czvf ${{ github.ref_name }}.tar.gz albert
+          zip -r ${{ github.ref_name }}.zip albert -x "*/.*"
+          
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: true
+          files: |
+            ${{ github.ref_name }}.tar.gz
+            ${{ github.ref_name }}.zip
+
+  # MacOS:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: [macos-11]
+  #       qt_version: [6.5.2]  # 6.2.4
+
+  #   runs-on: ${{ matrix.os }}
+
+  #   steps:
+    
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v3
+  #       with:
+  #         submodules: recursive
+          
+  #     - name: Get latest CMake and ninja
+  #       uses: lukka/get-cmake@latest
+        
+  #     - name: Install Qt dependencies
+  #       uses: jurplel/install-qt-action@v3
+  #       with:
+  #         version: ${{ matrix.qt_version }}
+  #         cache: true
+  #         modules: 'qtscxml qt5compat qtshadertools'
+
+  #     - name: Create writable /opt/local
+  #       run: sudo install -d -o $UID -m 755 /opt/local
+
+  #     - name: Install dependencies available at homebrew
+  #       run: brew install sparkle pybind11  # fortunately homebrew ships sparkle as universal binary
+
+  #     - uses: actions/checkout@v3
+      
+  #     - name: Restore macports dependencies
+  #       id: cache-macports  # ref'ed below
+  #       uses: actions/cache/restore@v4
+  #       with:
+  #         path: |
+  #           /opt/local/lib
+  #           /opt/local/include
+  #         key: ${{ matrix.os }}-macports-r1
+  
+  #     - name: Install macports (for universal binaries of libqalculate and libarchive)
+  #       if: steps.cache-macports.outputs.cache-hit != 'true'
+  #       run: |
+  #         case ${{ matrix.os }} in
+  #           macos-11)
+  #               wget "https://github.com/macports/macports-base/releases/download/v2.8.1/MacPorts-2.8.1-11-BigSur.pkg"
+  #               sudo installer -pkg ./MacPorts-2.8.1-11-BigSur.pkg -target /
+  #           ;;
+  #           macos-12)
+  #               wget "https://github.com/macports/macports-base/releases/download/v2.8.1/MacPorts-2.8.1-12-Monterey.pkg"
+  #               sudo installer -pkg ./MacPorts-2.8.1-12-Monterey.pkg -target /
+  #           ;;
+  #           macos-13)
+  #               wget "https://github.com/macports/macports-base/releases/download/v2.8.1/MacPorts-2.8.1-13-Ventura.pkg"
+  #               sudo installer -pkg ./MacPorts-2.8.1-13-Ventura.pkg -target /
+  #           ;;
+  #         esac
+  #         sudo sh -c 'echo "\n+universal" >> /opt/local/etc/macports/variants.conf'
+          
+  #     - name: Install dependencies using macports
+  #       if: steps.cache-macports.outputs.cache-hit != 'true'
+  #       run : sudo /opt/local/bin/port install libqalculate libarchive pybind11  # increase steps.cache-macports.outputs.cache-primary-key revision on change
+        
+  #     - name: Save macports dependencies
+  #       uses: actions/cache/save@v4
+  #       with:
+  #         path: |
+  #           /opt/local/lib
+  #           /opt/local/include
+  #         key: ${{ steps.cache-macports.outputs.cache-primary-key }}
+          
+  #     - name: Build and package
+  #       run: |
+  #         cmake -S . -B build \
+  #           -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
+  #           -DBUILD_TEMPLATE=OFF \
+  #           -DBUILD_DEBUG=OFF \
+  #           -DCMAKE_BUILD_TYPE=RelWithDebInfo
+  #         cmake --build build
+  #         cd build && cpack -V
+
+  #     - name: Generate appcast item
+  #       env:
+  #         EDDSA_PRIVATE_KEY: ${{ secrets.EDDSA_PRIVATE_KEY }}
+  #         VERSION: ${{ github.ref_name }}
+  #       run: ./dist/macos/generate_appcast_item.sh "build/Albert-${{ github.ref_name }}.dmg" "${VERSION:1}" "$EDDSA_PRIVATE_KEY" appcast_item.txt
+
+  #     - uses: actions/upload-artifact@v3
+  #       if: matrix.os == 'macos-11' # only lowest os
+  #       with:
+  #         name: macos-release-artifacts
+  #         path: |
+  #           appcast_item.txt
+  #           build/Albert-${{ github.ref_name }}.dmg
+  #           build/Albert-${{ github.ref_name }}.dmg.sha256
+
+  # Relase:
+  #   needs: MacOS
+  #   if: startsWith(github.ref, 'refs/tags/')
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Checkout website source code
+  #       uses: actions/checkout@v3
+  #       with:
+  #         repository: albertlauncher/documentation
+  #         ref: 'master'
+  #         token: ${{ secrets.PAT }}
+
+  #     - name: Get build artifacts
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: macos-release-artifacts
+
+  #     - name: list files
+  #       run: find .
+
+  #     - name: Upload
+  #       uses: softprops/action-gh-release@v1
+  #       with:
+  #         files: |
+  #           build/Albert-${{ github.ref_name }}.dmg
+  #           build/Albert-${{ github.ref_name }}.dmg.sha256
+
+  #     - run: sed -i -e '/<\/language>/r appcast_item.txt' src/appcast.xml
+
+  #     - name: Push appcast
+  #       run: |
+  #         git config --local user.name "GitHub Action"
+  #         git config --local user.email "action@github.com"
+  #         git add src/appcast.xml
+  #         git commit -m "Update appcast"
+  #         git push origin master
+
+  Linux:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        dockerfile: [arch.Dockerfile, fedora.latest.Dockerfile, ubuntu.2204.Dockerfile]
+
+    steps:
+    
+      - name: Checkout source code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          
+      - name: Build docker test image
+        run: docker build . --file .docker/${{ matrix.dockerfile }}

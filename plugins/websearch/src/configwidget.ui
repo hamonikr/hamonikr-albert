@@ -1,21 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Websearch::ConfigWidget</class>
- <widget class="QWidget" name="Websearch::ConfigWidget">
+ <class>ConfigWidget</class>
+ <widget class="QWidget" name="ConfigWidget">
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QTableView" name="tableView_searches">
      <property name="verticalScrollBarPolicy">
       <enum>Qt::ScrollBarAsNeeded</enum>
      </property>
      <property name="horizontalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOff</enum>
-     </property>
-     <property name="sizeAdjustPolicy">
-      <enum>QAbstractScrollArea::AdjustToContents</enum>
-     </property>
-     <property name="dragDropMode">
-      <enum>QAbstractItemView::InternalMove</enum>
+      <enum>Qt::ScrollBarAsNeeded</enum>
      </property>
      <property name="alternatingRowColors">
       <bool>true</bool>
@@ -35,42 +41,37 @@
      <attribute name="horizontalHeaderHighlightSections">
       <bool>false</bool>
      </attribute>
-     <attribute name="horizontalHeaderStretchLastSection">
-      <bool>true</bool>
-     </attribute>
      <attribute name="verticalHeaderVisible">
       <bool>false</bool>
      </attribute>
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0">
      <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Double click to edit.</string>
        </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
        </property>
-      </spacer>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="pushButton_new">
-       <property name="icon">
-        <iconset theme="list-add">
-         <normaloff>.</normaloff>.</iconset>
+       <property name="text">
+        <string>Add</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="pushButton_remove">
-       <property name="icon">
-        <iconset theme="list-remove">
-         <normaloff>.</normaloff>.</iconset>
+       <property name="text">
+        <string>Remove</string>
        </property>
       </widget>
      </item>

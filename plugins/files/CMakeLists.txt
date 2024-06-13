@@ -1,21 +1,39 @@
-cmake_minimum_required(VERSION 3.1.3)
+project(files VERSION 8.0)
 
-project(files)
+find_package(Qt6 REQUIRED COMPONENTS Concurrent)
 
-file(GLOB_RECURSE SRC src/*)
-
-find_package(Qt5 5.5.0 REQUIRED COMPONENTS Widgets Concurrent)
-
-add_library(${PROJECT_NAME} SHARED ${SRC} ${PROJECT_NAME}.qrc metadata.json)
-
-target_include_directories(${PROJECT_NAME} PRIVATE src/)
-
-target_link_libraries(${PROJECT_NAME}
-    PRIVATE
-        Qt5::Concurrent
-        Qt5::Widgets
-        albert::lib
-        xdg
+albert_plugin(
+    SOURCE_FILES
+        src/*.cpp
+        src/*.h
+        src/*.ui
+    PRIVATE_LINK_LIBRARIES
+        Qt6::Concurrent
 )
 
-install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/albert/plugins)
+if (BUILD_TESTS)
+    find_package(doctest)
+    set(TARGET_TST ${PROJECT_NAME}_test)
+    add_executable(${TARGET_TST} #${SRC}
+        test/test.cpp
+        src/fsindex.h
+        src/fsindex.cpp
+        src/fsindexpath.h
+        src/fsindexpath.cpp
+        src/fsindexnodes.h
+        src/fsindexnodes.cpp
+        src/fileitems.h
+        src/fileitems.cpp
+    )
+
+    target_include_directories(${TARGET_TST} PRIVATE
+        ${CMAKE_BINARY_DIR}/include
+        ../../include
+    )
+
+    target_link_libraries(${TARGET_TST} PRIVATE
+        doctest::doctest
+        Qt6::Core
+        albert::albert
+    )
+endif()

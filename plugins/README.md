@@ -1,62 +1,101 @@
 # C++/Qt plugins
 
-A native albert extension is a [Qt Plugin](http://doc.qt.io/qt-5/plugins-howto.html#the-low-level-api-extending-qt-applications.) which is nothing else but a special shared library. A plugin has to have the correct interface id (IID) and of course to implement this interfaces to be loaded, e.g. `Core::Extension` or `Core::Frontend`. The best way to to get an overview is to read the [core library interface](https://github.com/albertlauncher/albert/tree/master/include/albert) classes. The headers comments and the other plugins especially the [template extension](https://github.com/albertlauncher/plugins/tree/master/templateExtension) should get you started.
-
-The internal API is still not final yet. If you want to write a plugin check the other extensions. There are some caveats and requirements you should know:
-
-- Qt Plugin needs a metadata file
-- The metadata needs a unique id to be loaded
-- The metadata file name must match the name in the `Q_PLUGIN_METADATA` macro
-- The interface id defined in `Q_PLUGIN_METADATA` must match the current one defined in the interface headers for the plugin to be loaded.
+Native plugins are basically shared libraries.
+Their distribution is not that trivial due to ABI compatibilitiy (system libraries, compiler(-flags), system architecture, Qt versions, etc…).
+Therefore developing native plugins is rather worth it if you plan to get your code upstream and finally be shipped with the official plugins.
+For personal workflows or less complex use cases Python plugins are the way to go.
 
 ## Getting started
 
-The best way to get started is to copy the [template extension](https://github.com/albertlauncher/plugins/tree/master/templateExtension) and adjust the contents.
+The easiest way to build plugins is to checkout the source tree and build the entire app including plugins.
+Open the CMake project in your favourite C++ IDE and make it build and run.
+There may be some caveats, so probably you want to join the chats and ask in case of questions.
+From there on you could simply copy an existing plugin, e.g. the template plugin, and start implementing your extension.
+The following gives a brief overview.
+Details may change every now and then anyway.
 
-To keep the code readable there are some conventions that are not strictly necessary, but the intention is to unify the filenames of the plugins.The main class of the extension is called `Extension` and if the extension returns a configuration widget the class shall be called `ConfigWidget`. The metadata file is called `metadata.json`. This would implicitly lead to naming conflicts, therefor all classes of an extensions live in a dedicated namespace having the name of the extension. In bullets:
+## CMake
 
-- Copy the template extension.
-- Adjust the values contents in `metadata.json` and project name in `CmakeLists.txt`.
-- Rename the namespace. Remember to define the namespace in the `*.ui` files, too.
-- Make sure to have checked all core library headers .
-- Implement your extension.
+A native plugin is a [Qt Plugin](https://doc.qt.io/qt-6/plugins-howto.html#the-low-level-api-extending-qt-applications), i.e. a shared library providing a particular interface.
+Albert uses CMake and provides convenient macros, most notably the `albert_plugin` macro, you can utilize to get started without having to write a lot of CMake boilerplate code.
+Read the documentation header of the [CMake module](https://raw.githubusercontent.com/albertlauncher/albert/master/cmake/albert-macros.cmake) before you proceed.
 
-Contact us if you need [help](/help/).
+This basic CMakeLists.txt is sufficient to build a basic plugin without dependencies and translations:
 
-## Extension plugins
+```cmake
+project(my_plugin VERSION 1.0)
+albert_plugin(
+    SOURCE_FILES
+        src/*
+)
+```
 
-Implement the `Core::Extension` and `Core::QueryHandler` interface. Especially `Core::Extension` is not final yet. But this should not be a problem. Since changes would need you to just change a few lines of code.
+Unless you specify `METADATA` in the `albert_plugin` macro, a metadata file is expected to be found at `metadata.json`.
 
-`Core::QueryHandler` has several functions that will be called on special events. Most important is the virtual function `handleQuery(Query)` this function will be called when the user types in his queries.
-
-The `Core::Query` object contains all necessary information and accepts objects of abstract type `Core::Item`. Subclass it or use `Core::StandardItem`. The items interface has a getter for actions of abstract type `Core::Action`. Again subclass it or use `Core::StandardAction`. Furter there is the `Core::IndexableItem` interface with its standard implementation `Core::StandardIndexItem`. These items are for the use with the utility class `Core::OfflineIndex` which does basic offline indexing and searching for you.
-
-To get a detailed description of the interfaces read the header files of the core library interface classes.
-
-## Frontend plugins
-
-Implement the `Core::Frontend` interface. Implementing a frontend is a cumbersome process with tons of caveats. I will rather not write a documentation on it. [Contact](/help/) us directly.
+Supported metadata keys:
 
 
-## The plugin metadata
+|            Parameter |     Type     | Notes                                                                     |
+|---------------------:|:------------:|---------------------------------------------------------------------------|
+|                   id |              | Reserved. Added by CMake.                                                 |
+|              version |              | Reserved. Added by CMake.                                                 |
+|                 name | local string | Human readable name.                                                      |
+|          description | local string | Brief, imperative description, e.g. "Open files".                         |
+|              license |    string    | SPDX license identifier. E.g. BSD-2-Clause, MIT, LGPL-3.0-only, …         |
+|                  url |    string    | Browsable online source code, issues etc.                                 |
+|              authors | string list  | List of copyright holders. Preferably using mentionable GitHub usernames. |
+| runtime_dependencies | string list  | Default: `[]`. Required libraries.                                        |
+|  binary_dependencies | string list  | Default: `[]`. Required executables.                                      |
+|  plugin_dependencies | string list  | Default: `[]`. Required plugins.                                      |
+|              credits | string list  | Default: `[]`. Attributions, mentions, third party library licenses, …    |
+|             loadtype |    string    | Default: `user`. `frontend` or `user`.                      |
 
-The plugin metadata is a mandatory file that is needed to compile the plugin. Its content is *JSON* formatted and its name has to be equal to the the one specified in the `Q_PLUGIN_METADATA` in the extensions main class. The convention is to call it `metadata.json`. Its fields give the application information about the plugin without having to load the plugin.
-
-Currently the plugin specification has the following keys:
-- `id` is the unique identifier of the app. A plugin will not be loaded if its id has been registered already by an other plugin.
-- `name` is the pretty printed name of the plugin.
-- `version` is, well, the version of the plugin.
-- `author` name of the developer of this plugin.
-- `dependencies` is an array of dependencies of this plugin. These dependencies are mandatory for the plugin but optional for the application. The user is responsible to install them.
-
-A plugin specification could look like the following:
+A basic metadata file looks like this:
 
 ```json
 {
-    "id" :              "org.albert.extension.bookmarks",
-    "name" :            "Bookmarks",
-    "version" :         "1.1",
-    "author" :          "Manuel Schneider",
-    "dependencies" :    []
+    "name": "My Plugin",
+    "description": "Do useful stuff",
+    "authors": ["@myname"],
+    "license": "MIT",
+    "url": "https://github.com/myusername/my-albert-plugin",
 }
 ```
+## C++
+
+On the C++ side you have to tell the Qt MOC which interface the plugin implements and where the metadata is located.
+The `ALBERT_PLUGIN` define takes care of this.
+The MOC is triggered by the `QOBJECT` define.
+The fundamental base class for _all_ plugins is `albert::PluginInstance`.
+It is subclassed by the convenience classes for native plugins in the [`albert::plugin`](https://albertlauncher.github.io/reference/namespacealbert_1_1plugin.html) namespace.
+Read their documentation before you proceed.
+Check the inheritance diagram of the [`albert::Extension`](https://albertlauncher.github.io/reference/classalbert_1_1Extension.html) class for available extensions, especially the `albert::TriggerQueryHandler` and its subclasses.
+By now you should understand a plugin class declaration like this:
+
+```cpp
+#pragma once
+#include "albert/extension/queryhandler/globalqueryhandler.h"
+#include "albert/plugin.h"
+
+class Plugin : public albert::plugin::ExtensionPlugin, public albert::GlobalQueryHandler
+{
+    Q_OBJECT ALBERT_PLUGIN
+public:
+    std::vector<albert::RankItem> handleGlobalQuery(const GlobalQuery*) const override;
+    QWidget *buildConfigWidget() override;
+};
+```
+
+Now implement the virtual functions of the abstract classes you inherit.
+Ultimately you want to display and activate items.
+See
+ * the [`albert::Action`](https://albertlauncher.github.io/reference/classalbert_1_1Action.html),
+ * the abstract [`albert::Item`](https://albertlauncher.github.io/reference/classalbert_1_1Item.html) and
+ * the [`albert::StandardItem`](https://albertlauncher.github.io/reference/structalbert_1_1StandardItem.html) class.
+
+Self explanatory examples serve way better as educational source than hundreds of lines of text.
+See the [official native plugins](https://github.com/albertlauncher/plugins/tree/master/) as a reference.
+
+Finally you may want to skim through the entire [albert namespace](https://albertlauncher.github.io/reference/namespacealbert.html).
+
+If you need help, join our [community chats](https://albertlauncher.github.io/help/#chats).

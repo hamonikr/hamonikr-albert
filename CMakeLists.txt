@@ -1,15 +1,17 @@
-cmake_minimum_required(VERSION 3.1.3)  # Least supporting CMAKE_CXX_STANDARD
-###############################################################################
+cmake_minimum_required(VERSION 3.19)  # JSON support, Ubuntu 22.04
 
-project(albert VERSION 0.17.4)
+# dont touch! set by metatool
+set(PROJECT_VERSION 0.23.0)
 
-###############################################################################
+project(albert
+    VERSION ${PROJECT_VERSION}
+    DESCRIPTION "Keyboard launcher"
+    HOMEPAGE_URL "https://albertlauncher.github.io"
+)
+set(PROJECT_DISPLAY_NAME "Albert")
 
 include(GNUInstallDirs)
-
-###############################################################################
-
-add_definitions(-DALBERT_VERSION="${PROJECT_VERSION}")
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -20,128 +22,390 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 # Set standard
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Set additional compiler flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic") #-Wconversion -Wunused
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DQT_QML_DEBUG")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
+    -Winline \
+    -Wextra \
+    -Wshadow \
+    -Wstrict-aliasing \
+    -pedantic \
+    -Wall \
+    -Wno-inline \
+    -Werror=return-type \
+")
+#    -Werror \
+#    -Wshadow-field-in-constructor \
+#    -Wno-unused-parameter \
+#    -Wno-shadow \
+#    -Wl,-undefined \
+#    -Weffc++
+#    -Wconversion \
+#    -Wno-deprecated \
+#string(APPEND CMAKE_SHARED_LINKER_FLAGS " -Wl,-undefined,error")  #macosonly
 
-# Color make output
-SET(CMAKE_COLOR_MAKEFILE ON)
+# Set build timestamp for report.cpp
+string(TIMESTAMP BUILD_TIMESTAMP "%Y-%m-%d %H:%M:%S")
+add_definitions(-DBUILD_TIMESTAMP="${BUILD_TIMESTAMP}")
 
 # Put the binaries in dedicated toplevel directories
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-###############################################################################
+### QHotkey  ##################################################################
 
-add_subdirectory(lib/globalshortcut)
-add_subdirectory(lib/xdg)
-add_subdirectory(plugins/)
+set(QT_DEFAULT_MAJOR_VERSION 6)
+set(BUILD_SHARED_LIBS FALSE)
+set(QHOTKEY_INSTALL OFF CACHE BOOL "" FORCE)
+add_subdirectory(lib/QHotkey EXCLUDE_FROM_ALL)
+target_compile_options(qhotkey PRIVATE -Wno-unused-parameter -Wno-shadow)
 
-###############################################################################
 
-set(TARGET_NAME_LIB ${PROJECT_NAME}-lib)
+### Lib  ######################################################################
 
-file(GLOB_RECURSE LIB_SRC include/* src/lib/*)
+set(TARGET_LIB lib${PROJECT_NAME})
 
-add_library(${TARGET_NAME_LIB} SHARED ${LIB_SRC})
-add_library(albert::lib ALIAS ${TARGET_NAME_LIB})
-
-set_target_properties(${TARGET_NAME_LIB} PROPERTIES
-    OUTPUT_NAME ${PROJECT_NAME}
-    INSTALL_RPATH "$ORIGIN"
+file(GLOB_RECURSE LIB_PUBLIC_HEADER
+    ${PROJECT_BINARY_DIR}/include/*.h
+    ${PROJECT_SOURCE_DIR}/include/*.h
 )
 
-target_compile_definitions(${TARGET_NAME_LIB} PRIVATE -DCORE) #export branch
+file(GLOB_RECURSE LIB_SRC_UI src/*.ui)
 
-target_include_directories(${TARGET_NAME_LIB}
+file(GLOB LIB_SRC
+    src/*.h
+    src/*.cpp
+    src/plugin/*
+    src/platform/*.h
+    src/settings/*
+    src/settings/querywidget/*.h
+    src/settings/querywidget/*.cpp
+    src/settings/pluginswidget/*.h
+    src/settings/pluginswidget/*.cpp
+)
+
+file(GLOB_RECURSE LIB_SRC_PLATFORM
+    src/platform/${CMAKE_SYSTEM_NAME}/*.h
+    src/platform/${CMAKE_SYSTEM_NAME}/*.cpp
+    src/platform/${CMAKE_SYSTEM_NAME}/*.mm
+)
+
+add_library(${TARGET_LIB} SHARED
+    ${LIB_PUBLIC_HEADER}
+    ${LIB_SRC_PLATFORM}
+    ${LIB_SRC_UI}
+    ${LIB_SRC}
+    src/resources.qrc
+)
+
+add_library(albert::albert ALIAS ${TARGET_LIB})
+
+include(GenerateExportHeader)
+generate_export_header(${TARGET_LIB}
+    BASE_NAME ${PROJECT_NAME}
+    EXPORT_FILE_NAME "${PROJECT_BINARY_DIR}/include/albert/export.h"
+)
+
+target_include_directories(${TARGET_LIB}
     PUBLIC
-        include
+        "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>"
+        "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
+        "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
     PRIVATE
-        include/albert
-        include/albert/util
-        src/lib
+        src/
 )
 
-find_package(Qt5 5.5.0
-    COMPONENTS
-        Gui
-        Sql
+configure_file(
+    "${PROJECT_SOURCE_DIR}/include/albert/config.h.in"
+    "${PROJECT_BINARY_DIR}/include/albert/config.h"
+    @ONLY
 )
 
-target_link_libraries(${TARGET_NAME_LIB}
+find_package(Qt6 6.2 REQUIRED COMPONENTS # Ubuntu 22.04
+    Core
+    Concurrent
+    Network
+    Sql
+    Svg
+    Widgets
+    LinguistTools
+)
+
+target_link_libraries(${TARGET_LIB}
+    PUBLIC
+        Qt6::Core
+        Qt6::Widgets
     PRIVATE
-        Qt5::Gui
-        Qt5::Sql
+        Qt6::Concurrent
+        Qt6::Network
+        Qt6::Sql
+        qhotkey
 )
 
-###############################################################################
-
-option(BUILD_WITH_QTCHARTS "Use QtCharts to plot stats." ON)
-
-find_package(Qt5 5.5.0
-    COMPONENTS
-        Concurrent
-        Network
-        Sql
-        Widgets
-        X11Extras
-    OPTIONAL_COMPONENTS
-        Charts
+set_target_properties(${TARGET_LIB} PROPERTIES
+    #INSTALL_RPATH "$ORIGIN"
+    CXX_VISIBILITY_PRESET hidden
+    FRAMEWORK TRUE
+    FRAMEWORK_VERSION A
+    MACOSX_FRAMEWORK_BUNDLE_VERSION "${PROJECT_VERSION}"
+    MACOSX_FRAMEWORK_IDENTIFIER "org.albertlauncher.albert.interface"
+    MACOSX_FRAMEWORK_SHORT_VERSION_STRING ${PROJECT_VERSION}
+    OUTPUT_NAME "${PROJECT_NAME}"
+    PUBLIC_HEADER "${LIB_PUBLIC_HEADER}"
+    SOVERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}"  # also mach-o compat version
+    # NO_SONAME true # do _not_ add. linkers other that ldd will make troubles using non relative paths
+    VERSION ${PROJECT_VERSION}
+    VISIBILITY_INLINES_HIDDEN 1
 )
 
-set(TARGET_NAME_BIN ${PROJECT_NAME}-bin)
+# Internationalization
 
-file(GLOB_RECURSE BIN_SRC src/app/*)
-if(NOT BUILD_WITH_QTCHARTS)  # TODO: remove Apr 2020
-    list(REMOVE_ITEM BIN_SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/app/settingswidget/statswidget.h")
-    list(REMOVE_ITEM BIN_SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/app/settingswidget/statswidget.cpp")
+file(GLOB TS_FILES i18n/*.ts)
+
+qt_add_lrelease(${TARGET_LIB}
+    TS_FILES ${TS_FILES}
+    QM_FILES_OUTPUT_VARIABLE QM_FILES
+)
+
+qt_add_resources(${TARGET_LIB} "i18n"
+    PREFIX "/i18n"
+    BASE "${CMAKE_CURRENT_BINARY_DIR}"
+    FILES "${QM_FILES}"
+)
+
+### Platform specifics ########################################################
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
+    if (DEFINED CMAKE_LIBRARY_ARCHITECTURE)
+        target_compile_definitions(${TARGET_LIB} PRIVATE -DMULTIARCH_TUPLE="${CMAKE_LIBRARY_ARCHITECTURE}")
+        target_link_libraries(${TARGET_LIB} PRIVATE Qt6::DBus)  # notifications
+    endif()
 endif()
 
-add_executable(${TARGET_NAME_BIN} ${BIN_SRC} resources.qrc)
-
-set_target_properties(${TARGET_NAME_BIN} PROPERTIES
-    OUTPUT_NAME ${PROJECT_NAME}
-    INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}/albert/"  # Set the RPATH for the library lookup
-)
-
-target_include_directories(${TARGET_NAME_BIN} PRIVATE src/app src/app/settingswidget)
-if (DEFINED CMAKE_LIBRARY_ARCHITECTURE)
-    target_compile_definitions(${TARGET_NAME_BIN} PRIVATE -DMULTIARCH_TUPLE="${CMAKE_LIBRARY_ARCHITECTURE}")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    target_link_libraries(${TARGET_LIB}
+        PRIVATE
+        objc
+        "-framework Cocoa"
+        #"-framework UserNotifications"
+    )
 endif()
 
-target_link_libraries(${TARGET_NAME_BIN}
-    PRIVATE
-        Qt5::Concurrent
-        Qt5::Network
-        Qt5::Sql
-        Qt5::Widgets
-        Qt5::X11Extras
-        albert::lib
-        globalshortcut
-        xdg
-)
-if(BUILD_WITH_QTCHARTS)
-    target_link_libraries(${TARGET_NAME_BIN} PRIVATE Qt5::Charts)
-    target_compile_definitions(${TARGET_NAME_BIN} PRIVATE -DBUILD_WITH_QTCHARTS) #export branch
+if (UNIX)
+    target_sources(${TARGET_LIB} PRIVATE
+        src/platform/Unix/unixsignalhandler.h
+        src/platform/Unix/unixsignalhandler.cpp
+    )
+endif (UNIX)
+
+
+### App  ######################################################################
+
+set(TARGET_APP ${CMAKE_PROJECT_NAME})
+
+add_executable(${TARGET_APP} MACOSX_BUNDLE "src/main.cpp")
+
+# Platform specific stuff
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" OR ${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
+
+    install(FILES dist/xdg/albert.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications )
+    install(FILES resources/albert.svg DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps)
+    # Add HamoniKR Default Settings
+    install(DIRECTORY "hamonikr/etc/" DESTINATION ${CMAKE_INSTALL_SYSCONFDIR})
+
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
+    set_target_properties(${TARGET_APP} PROPERTIES MACOSX_BUNDLE TRUE)
+
+    set(ICON_NAME "albert")
+    set(ICON_PATH "dist/macos/${ICON_NAME}.icns")
+    target_sources(${TARGET_APP} PRIVATE ${ICON_PATH})
+
+    set_source_files_properties(${ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+
+    set_target_properties(${TARGET_APP} PROPERTIES
+        BUNDLE True
+        MACOSX_BUNDLE_BUNDLE_NAME "${PROJECT_DISPLAY_NAME}"
+        MACOSX_BUNDLE_BUNDLE_VERSION "${CMAKE_PROJECT_VERSION}"
+        MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2023 Manuel Schneider"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "org.albertlauncher.albert"
+        MACOSX_BUNDLE_ICON_FILE ${ICON_NAME}
+        MACOSX_BUNDLE_INFO_STRING "Albert keyboard launcher"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "${CMAKE_PROJECT_VERSION}"
+    )
+
 endif()
 
-###############################################################################
-
-install(TARGETS ${TARGET_NAME_LIB} ${TARGET_NAME_BIN}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/albert
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+target_link_libraries(${TARGET_APP}
+    PRIVATE ${TARGET_LIB}
 )
 
-# Do platform specific post target stuff
-if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    # Install desktop entry and icon
-   # install(FILES resources/albert.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications )
-   install(FILES resources/icons/albert.svg DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps)
-   # Add HamoniKR Default Settings
-   install(DIRECTORY "hamonikr/etc/" DESTINATION ${CMAKE_INSTALL_SYSCONFDIR})
-   install(FILES hamonikr/albert.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications )
-endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+set_target_properties(${TARGET_APP} PROPERTIES
+    OUTPUT_NAME ${CMAKE_PROJECT_NAME}
+    #INSTALL_RPATH_USE_LINK_PATH TRUE
+    #INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}"
+    #BUILD_WITH_INSTALL_RPATH FALSE
+    #INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}/albert/"  # Set the RPATH for the library lookup
+    #INSTALL_RPATH "$ORIGIN/../Frameworks/albert/"  # Set the RPATH for the library lookup
+)
+
+
+### Test ######################################################################
+
+option(BUILD_TESTS "Build tests (Reqiures doctest)" OFF)
+if (BUILD_TESTS)
+    set(TARGET_TST ${CMAKE_PROJECT_NAME}_test)
+    find_package(doctest)
+
+#    get_target_property(SRC_TST ${TARGET_LIB} SOURCES)
+#    get_target_property(INC_TST ${TARGET_LIB} PRIVATE_HEADER)
+
+    add_executable(${TARGET_TST}
+        test/test.cpp
+        src/itemindex.cpp
+        src/levenshtein.cpp
+        test/test.cpp
+    )
+    target_link_libraries(${TARGET_TST} PRIVATE ${TARGET_LIB})
+    target_include_directories(${TARGET_TST} PRIVATE include src)
+    target_link_libraries(${TARGET_TST} PRIVATE
+        doctest::doctest
+        Qt6::Core
+        Qt6::Concurrent
+        Qt6::Sql
+    )
+endif()
+
+
+### Plugins ###################################################################
+
+include("cmake/albert-macros.cmake")
+
+FILE(GLOB children RELATIVE ${PROJECT_SOURCE_DIR}/plugins/ plugins/*)
+LIST(FILTER children EXCLUDE REGEX "^\\..+")
+FOREACH(child ${children})
+    IF(IS_DIRECTORY ${PROJECT_SOURCE_DIR}/plugins/${child})
+        string(TOUPPER ${child} CHILD)
+        option(BUILD_${CHILD} "Build ${child}" ON)
+        if (BUILD_${CHILD})
+            add_subdirectory(plugins/${child})
+        endif()
+    ENDIF()
+ENDFOREACH()
+
+
+### Install ###################################################################
+
+install(
+    TARGETS ${TARGET_APP} ${TARGET_LIB}
+    TARGETS EXPORT ${EXPORT_TARGETS}
+    BUNDLE    DESTINATION .
+    FRAMEWORK DESTINATION .
+    RUNTIME   DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    LIBRARY   DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+
+
+#message("CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}")
+#message("CMAKE_CURRENT_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}")
+#message("PROJECT_SOURCE_DIR ${PROJECT_SOURCE_DIR}")
+#message("PROJECT_BINARY_DIR ${PROJECT_BINARY_DIR}")
+#message("CMAKE_CURRENT_LIST_DIR ${CMAKE_CURRENT_LIST_DIR}")
+#message("CMAKE_INSTALL_DATADIR ${CMAKE_INSTALL_DATADIR}")
+#message("CMAKE_INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR}")
+#message("CMAKE_INSTALL_BINDIR ${CMAKE_INSTALL_BINDIR}")
+#message("CMAKE_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR}")
+
+#set (EXPORT_TARGETS AlbertTargets)
+
+## install headers
+#file(GLOB_RECURSE
+#    TARGET_HEADER_FILES
+#    "${PROJECT_SOURCE_DIR}/include/*.h"
+#    "${PROJECT_BINARY_DIR}/include/*.h"
+#)
+#message(${TARGET_HEADER_FILES})
+#install(DIRECTORY mydir/ DESTINATION dir/newname)
+#install(FILES ${TARGET_HEADER_FILES} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+## Create targets file in install tree
+#install(
+#    EXPORT ${EXPORT_TARGETS}
+#    FILE "${PROJECT_NAME}-targets.cmake"
+#    DESTINATION ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}-${PROJECT_VERSION}
+#    NAMESPACE ${PROJECT_NAME}::
+#)
+
+## Create targets file in build tree
+#export(
+#    EXPORT ${EXPORT_TARGETS}
+#    FILE "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-targets.cmake"
+#    NAMESPACE ${PROJECT_NAME}::
+#)
+
+## Create config file in build tree
+#include(CMakePackageConfigHelpers)
+#configure_package_config_file(
+#    "${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME}-config.cmake.in"
+#    "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
+#    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}-${PROJECT_VERSION}
+#)
+
+## Create version config file in build tree
+#write_basic_package_version_file(
+#    "${PROJECT_NAME}-config-version.cmake"
+#    VERSION ${PROJECT_VERSION}
+#    COMPATIBILITY SameMajorVersion
+#)
+
+# install version and config file
+#install(FILES
+#    "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
+#    "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake"
+#    "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-macros.cmake"
+#    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/albert
+#)
+
+## Copy macros to build tree
+#configure_file(
+#    "${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME}-macros.cmake"
+#    "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-macros.cmake"
+#    COPYONLY
+#)
+
+# Export the package to make find_package work in build
+#set(CMAKE_EXPORT_PACKAGE_REGISTRY true)
+#export(PACKAGE ${PROJECT_NAME})
+
+
+
+
+### Packaging #################################################################
+
+if (APPLE)
+    set(CPACK_GENERATOR "DragNDrop")
+    set(CPACK_PACKAGE_CHECKSUM "SHA256")
+    set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.md")
+    set(CPACK_PACKAGE_EXECUTABLES "albert" "Albert executable")
+    set(CPACK_PACKAGE_FILE_NAME "${PROJECT_DISPLAY_NAME}-v${PROJECT_VERSION}")
+    set(CPACK_PACKAGE_NAME "${PROJECT_DISPLAY_NAME}")
+    #set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}/${ICON_PATH}")
+    set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CMAKE_PROJECT_NAME}")
+    set(CPACK_PACKAGE_VENDOR "manuelschneid3r")
+    set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE.md")
+    set(CPACK_RESOURCE_FILE_README "${PROJECT_SOURCE_DIR}/README.md")
+    set(CPACK_RESOURCE_FILE_WELCOME "${PROJECT_SOURCE_DIR}/README.md")
+    set(CPACK_STRIP_FILES TRUE)
+    set(CPACK_MONOLITHIC_INSTALL TRUE)
+
+    configure_file("cmake/bundle-macos.cmake.in" "${PROJECT_BINARY_DIR}/bundle-macos.cmake" @ONLY)
+    install(SCRIPT "${PROJECT_BINARY_DIR}/bundle-macos.cmake")
+
+    include(CPack)
+endif()
