@@ -552,13 +552,12 @@ The global handler evaluates basic math expressions. Use the trigger handler to 
         <source>Do you really want to remove &apos;%1&apos; from the search engines?</source>
         <translation>검색 엔진에서 &apos;%1&apos; 을 정말로 제거하시겠습니까?</translation>
     </message>
-    <message>
         <source>Do you really want to restore the default search engines?</source>
         <translation>정말 기본 검색 엔진을 복원하고 싶으신가요?</translation>
     </message>
     <message>
         <source>Remove docset &apos;%1&apos; at %2?</source>
-        <translation>%2 에서 파일 형식 &apos;%1&apos; 을 제거하시겠습니까?</translation>
+        <translation>%2 에서 문서 세트 &apos;%1&apos; 을 제거하시겠습니까?</translation>
     </message>
 </context>
 <context>
@@ -882,7 +881,7 @@ The global handler evaluates basic math expressions. Use the trigger handler to 
     </message>
     <message>
         <source>Downloading docset list from &apos;%1&apos;</source>
-        <translation>&apos;%1&apos; 에서 파일 형식 목록 다운로드 중</translation>
+        <translation>&apos;%1&apos; 에서 문서 세트 목록 다운로드 중</translation>
     </message>
     <message>
         <source>Lock</source>
@@ -942,7 +941,7 @@ The global handler evaluates basic math expressions. Use the trigger handler to 
     </message>
     <message>
         <source>Error fetching docset list: %1</source>
-        <translation>파일 형식 목록을 가져오는 동안 오류가 발생했습니다: %1</translation>
+        <translation>문서 세트 목록을 가져오는 동안 오류가 발생했습니다: %1</translation>
     </message>
     <message>
         <source>Restart the machine</source>
@@ -970,11 +969,11 @@ The global handler evaluates basic math expressions. Use the trigger handler to 
     </message>
     <message>
         <source>Docset list updated.</source>
-        <translation>파일 형식 목록이 업데이트되었습니다.</translation>
+        <translation>문서 세트 목록이 업데이트되었습니다.</translation>
     </message>
     <message>
         <source>Failed to save fetched docset list: %1</source>
-        <translation>가져온 파일 형식 목록을 저장하지 못했습니다: %1</translation>
+        <translation>가져온 문서 세트 목록을 저장하지 못했습니다: %1</translation>
     </message>
     <message>
         <source>Select bookmarks file</source>
@@ -990,15 +989,15 @@ The global handler evaluates basic math expressions. Use the trigger handler to 
     </message>
     <message>
         <source>Visit documentation</source>
-        <translation>파일 보기</translation>
+        <translation>문서 방문하기</translation>
     </message>
     <message>
         <source>Failed to parse docset list: %1</source>
-        <translation>파일 형식 목록을 구문 분석하지 못했습니다: %1</translation>
+        <translation>문서 세트 목록을 구문 분석하지 못했습니다: %1</translation>
     </message>
     <message>
         <source>Downloading docset from &apos;%1&apos;</source>
-        <translation>&apos;%1&apos; 에서 파일 형식을 다운로드하는 중</translation>
+        <translation>&apos;%1&apos; 에서 문서 세트를 다운로드하는 중</translation>
     </message>
     <message>
         <source>Extracting file &apos;%1&apos;</source>
@@ -1006,7 +1005,7 @@ The global handler evaluates basic math expressions. Use the trigger handler to 
     </message>
     <message>
         <source>Searching docset in &apos;%1&apos;</source>
-        <translation>&apos;%1&apos;에서 파일 형식 검색 중</translation>
+        <translation>&apos;%1&apos;에서 문서 세트 검색 중</translation>
     </message>
     <message>
         <source>Renaming &apos;%1&apos; to &apos;%2&apos;</source>
@@ -1014,7 +1013,7 @@ The global handler evaluates basic math expressions. Use the trigger handler to 
     </message>
     <message>
         <source>Docset &apos;%1&apos; ready.</source>
-        <translation>파일 형식 &apos;%1&apos; 이 준비되었습니다.</translation>
+        <translation>문서 세트 &apos;%1&apos; 이 준비되었습니다.</translation>
     </message>
     <message>
         <source>Failed renaming dir &apos;%1&apos; to &apos;%2&apos;.</source>
@@ -1022,11 +1021,11 @@ The global handler evaluates basic math expressions. Use the trigger handler to 
     </message>
     <message>
         <source>Failed finding extracted docset in %1</source>
-        <translation>%1 에서 추출된 파일 형식을 찾지 못했습니다</translation>
+        <translation>%1 에서 추출된 문서 세트를 찾지 못했습니다</translation>
     </message>
     <message>
         <source>Extracting docset failed: &apos;%1&apos; (%2)</source>
-        <translation>파일 형식을 추출하지 못했습니다: &apos;%1&apos; (%2)</translation>
+        <translation>문서 세트를 추출하지 못했습니다: &apos;%1&apos; (%2)</translation>
     </message>
     <message>
         <source>Failed to write to file: &apos;%1&apos;</source>
@@ -1038,7 +1037,7 @@ The global handler evaluates basic math expressions. Use the trigger handler to 
     </message>
     <message>
         <source>Cancelled &apos;%1&apos; docset download.</source>
-        <translation>&apos;%1&apos; 파일 형식 다운로드를 취소했습니다.</translation>
+        <translation>&apos;%1&apos; 문서 세트 다운로드를 취소했습니다.</translation>
     </message>
     <message>
         <source>Directory removed &apos;%1&apos;</source>
