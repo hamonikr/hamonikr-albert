@@ -1,0 +1,51 @@
+#!/bin/sh
+# postinst script
+# see: dh_installdeb(1)
+
+set -e
+
+case "$1" in
+    configure)
+
+    glib-compile-schemas /usr/share/glib-2.0/schemas
+
+    # Get the Real Username
+    RUID=$(who | awk 'FNR == 1 {print $1}')
+
+    # Translate Real Username to Real User ID
+    RUSER_UID=$(id -u ${RUID})
+
+    # Register in System shortcut key setting as Ctrl+Space
+    sudo -u ${RUID} DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${RUSER_UID}/bus" dconf load / <<EOF
+[org/gnome/settings-daemon/plugins/media-keys]
+custom-keybindings=['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']
+
+[org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0]
+binding='<Control>space'
+command='albert toggle'
+name='albert'
+EOF
+
+    # Copy the configuration file to existing users' home directory
+    for user in /home/*; do
+        if [ -d "$user" ]; then
+            mkdir -p "$user/.config"
+            cp /etc/skel/.config/albert.conf "$user/.config/albert.conf"
+            chown $(basename "$user"):$(basename "$user") "$user/.config/albert.conf"
+        fi
+    done
+
+    ;;
+    abort-upgrade|abort-remove|abort-deconfigure)
+
+    ;;
+    triggered)
+
+    ;;
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+exit 0

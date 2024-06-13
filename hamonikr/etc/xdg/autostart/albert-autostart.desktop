@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Name[en_US]=Albert
+Name=Albert
+Name[ko]=Albert 런처
+Comment[en_US]=Start Albert launcher at system startup
+Comment[ko_KR]=빠른 데스크톱 런처
+Comment=Start Albert launcher at system startup
+Exec=albert --platform xcb
+Hidden=false
+NoDisplay=false
+StartupNotify=false
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=3
