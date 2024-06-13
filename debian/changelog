@@ -1,4 +1,4 @@
-albert (0.23.0-0+612.1h1) noble; urgency=medium
+albert (0.23.0-0+hamonikr1) stable; urgency=medium
 
   * Release for ubuntu 24.04
    - Update from latest upstream v0.23
@@ -7,12 +7,6 @@ albert (0.23.0-0+612.1h1) noble; urgency=medium
    - Fixed autostart albert in ubuntu 24.04
 
  -- HamoniKR <pkg@hamonikr.org>  Wed, 12 Jun 2024 22:51:47 +0900
-
-albert (0.23.0-0+612.1) stable; urgency=low
-
-  * version number update by debtransform
-
- -- debtransform <build@opensuse.org>  Thu, 23 May 2024 11:15:22 +0000
 
 albert (0.23.0-0) stable; urgency=low
 
