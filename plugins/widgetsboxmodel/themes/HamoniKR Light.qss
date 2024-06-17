@@ -4,14 +4,14 @@
     src: url("https://fonts.googleapis.com/css2?family=Nanum+Gothic|Nanum+Gothic+Coding|Noto+Sans+KR|Open+Sans");
     font-weight: 400;
     border: none;
-    color: #808080;
-    background-color: #fcfcfc;
+    color: #bfd1d1d1;
+    background-color: #bf8a8a8a;
 }
 
 #frame {
-    padding: 15px 15px;
+    padding: 10px 10px;
     border-radius: 25px;
-    background-color: #fcfcfc;
+    background-color: #BF252525;
     min-width:700px;
     max-width:700px;
 }
@@ -19,14 +19,14 @@
 #inputLine {
     padding: 2px 15px;
     font-size: 24px;
-    selection-color: #606060;
-    selection-background-color: #e0e0e0;
+    selection-color: #030303;
+    selection-background-color: #808080;
     background-color: transparent;
 }
 
 #settingsButton {
     margin: 6px 6px 0px 0px;
-    color: #808080;
+    color: #bfd1d1d1;
     background-color: transparent;
     padding: 2px;
     min-width:15px;
@@ -39,23 +39,23 @@
 
 QListView {
     background: transparent;
-    selection-color: #606060;
+    selection-color: #ffffff;
     padding: 5px 5px 5px 5px;
 }
 
 QListView::item:selected {
-    background: #e0e0e0;
+    background: #0767c8;
     border-radius: 10px;
     padding: 2px 2px 2px 2px;
 }
 
 QListView QScrollBar:vertical  {
     width: 2px;
-    background: transparent;
+    background: #000000;
 }
 
 QListView QScrollBar::handle:vertical  {
-    background: #808080;
+    background: #BF808080;
     border-radius: 3px;
     min-height: 100px;
 }
@@ -66,7 +66,7 @@ QListView QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
     border: 0px;
     width: 0px;
     height: 0px;
-    background: transparent;
+    background: #BF252525;
 }
 
 /********** resultsList **********/
