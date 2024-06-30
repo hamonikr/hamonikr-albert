@@ -1,3 +1,10 @@
+albert (0.24.2+hamonikr1) stable; urgency=medium
+
+  * Release for ubuntu 24.04
+   - no change
+
+ -- HamoniKR <pkg@hamonikr.org>  Mon, 01 Jul 2024 02:07:08 +0900
+
 albert (0.23.0-0+hamonikr2) stable; urgency=medium
 
   * Update default style
