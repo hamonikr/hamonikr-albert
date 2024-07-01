@@ -6,9 +6,8 @@ RUN pacman -Syu --verbose --noconfirm \
     gcc \
     libarchive \
     libqalculate \
+    libxml2 \
     make \
-    muparser \
-    pybind11 \
     python \
     pkgconf \
     qt6-base \
@@ -19,18 +18,19 @@ RUN pacman -Syu --verbose --noconfirm \
 
 COPY . /src
 WORKDIR /build
+
+# Build the entire project
 RUN rm -rf * \
- && cmake /src \
-    -DCMAKE_INSTALL_PREFIX=/usr \
-    -DQT_DEBUG_FIND_PACKAGE=ON \
+ && cmake /src -DCMAKE_INSTALL_PREFIX=/usr \
  && make -j $(nproc) \
  && make install
 
-FROM builder AS runtime
+# Test build the apps plugin as separate project
+RUN rm -rf * \
+ && cmake /src/plugins/applications \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_PREFIX_PATH=/usr/lib/$(gcc -dumpmachine)/cmake/ \
+ && make -j $(nproc) \
+ && make install
 
-RUN pacman -Syu --verbose --noconfirm \
-    xorg-server \
-    qt6-5compat \
-    xterm
-ENTRYPOINT ["albert"]
-CMD ["-d"]
+ENTRYPOINT ["bash"]
