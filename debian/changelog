@@ -1,3 +1,9 @@
+albert (0.24.2+hamonikr2) stable; urgency=medium
+
+  * Fixed postinst script
+
+ -- HamoniKR <pkg@hamonikr.org>  Mon, 08 Jul 2024 19:35:55 +0900
+
 albert (0.24.2+hamonikr1) stable; urgency=medium
 
   * Release for ubuntu 24.04

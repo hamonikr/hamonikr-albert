@@ -30,8 +30,8 @@ EOF
     for user in /home/*; do
         if [ -d "$user" ]; then
             mkdir -p "$user/.config"
-            cp /etc/skel/.config/albert.conf "$user/.config/albert.conf"
-            chown $(basename "$user"):$(basename "$user") "$user/.config/albert.conf"
+            cp /etc/skel/.config/albert.conf "$user/.config/albert.conf" || true
+            chown $(basename "$user"):$(basename "$user") "$user/.config/albert.conf" || true
         fi
     done
 
