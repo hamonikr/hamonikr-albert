@@ -1,3 +1,9 @@
+albert (0.24.2+hamonikr3) stable; urgency=medium
+
+  * Release for bookworm arm64
+
+ -- HamoniKR <pkg@hamonikr.org>  Fri, 12 Jul 2024 02:01:00 +0900
+
 albert (0.24.2+hamonikr2) stable; urgency=medium
 
   * Fixed postinst script
