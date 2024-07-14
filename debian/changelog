@@ -1,3 +1,10 @@
+albert (0.24.2+hamonikr6) stable; urgency=medium
+
+  * Release for bookworm arm64
+   - Removed version check
+
+ -- HamoniKR <pkg@hamonikr.org>  Mon, 15 Jul 2024 01:54:28 +0900
+
 albert (0.24.2+hamonikr5) stable; urgency=medium
 
   * Release for bookworm arm64
