@@ -3,13 +3,13 @@
 * {
     border: none;
     color : #808080;
-    background-color: #fcfcfc;
+    background-color: #323232;
 }
 
 #frame {
     padding: 8px 0px;
     border-radius: 10px;
-    background-color: #fcfcfc;
+    background-color: #323232;
     min-width:640px;
     max-width:640px;
 }
@@ -17,8 +17,8 @@
 #inputLine {
     padding: 0px 8px;
     font-size: 28px;
-    selection-color: #606060;
-    selection-background-color: #e0e0e0;
+    selection-color: #a0a0a0;
+    selection-background-color: #505050;
     background-color: transparent;
 }
 
@@ -37,11 +37,11 @@
 
 QListView {
     background: transparent;
-    selection-color: #606060;
+    selection-color: #a0a0a0;
 }
 
 QListView::item:selected {
-    background: #e0e0e0;
+    background: #505050;
 }
 
 QListView QScrollBar:vertical  {

@@ -1,3 +1,15 @@
+albert (0.24.2+hamonikr5) stable; urgency=medium
+
+  * Release for bookworm arm64
+
+ -- HamoniKR <pkg@hamonikr.org>  Sun, 14 Jul 2024 12:59:07 +0900
+
+albert (0.24.2+hamonikr4) stable; urgency=medium
+
+  * Fix postinst in bookworm arm64
+
+ -- HamoniKR <pkg@hamonikr.org>  Sun, 14 Jul 2024 11:54:06 +0900
+
 albert (0.24.2+hamonikr3) stable; urgency=medium
 
   * Release for bookworm arm64
