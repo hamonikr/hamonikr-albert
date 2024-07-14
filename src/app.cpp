@@ -45,7 +45,7 @@ void App::initialize()
 
     platform::initNativeWindow(frontend->winId());
 
-    notifyVersionChange();
+    // notifyVersionChange();
 
     extension_registry.registerExtension(&app_query_handler);
     extension_registry.registerExtension(&plugin_query_handler);
