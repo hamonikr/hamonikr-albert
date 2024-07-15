@@ -1,3 +1,10 @@
+albert (0.24.2+hamonikr7) stable; urgency=medium
+
+  * Release for bookworm arm64
+   - Set Telemetry as desable
+
+ -- HamoniKR <pkg@hamonikr.org>  Mon, 15 Jul 2024 14:45:13 +0900
+
 albert (0.24.2+hamonikr6) stable; urgency=medium
 
   * Release for bookworm arm64
