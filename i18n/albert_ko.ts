@@ -1134,12 +1134,12 @@ The global handler evaluates basic math expressions. Use the trigger handler to 
     <message>
         <location filename="../src/pluginqueryhandler.cpp" line="69"/>
         <source>Enabled</source>
-        <translation>활성화됨</translation>
+        <translation>사용가능</translation>
     </message>
     <message>
         <location filename="../src/pluginqueryhandler.cpp" line="70"/>
         <source>Disabled</source>
-        <translation>장애인</translation>
+        <translation>사용중지</translation>
     </message>
     <message>
         <location filename="../src/pluginqueryhandler.cpp" line="56"/>

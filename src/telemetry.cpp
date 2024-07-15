@@ -24,16 +24,19 @@ Telemetry::Telemetry()
     auto s = settings();
     if (!s->contains(CFG_TELEMETRY))
     {
-        auto text = QCoreApplication::translate(
-            "Telemetry", "Albert collects anonymous data to enhance user experience. "
-                         "You can review the data to be sent in the details. Opt in?");
+        // auto text = QCoreApplication::translate(
+        //     "Telemetry", "Albert collects anonymous data to enhance user experience. "
+        //                  "You can review the data to be sent in the details. Opt in?");
 
-        QMessageBox mb(QMessageBox::Question, qApp->applicationDisplayName(),
-                       text, QMessageBox::No|QMessageBox::Yes);
+        // QMessageBox mb(QMessageBox::Question, qApp->applicationDisplayName(),
+        //                text, QMessageBox::No|QMessageBox::Yes);
 
-        mb.setDefaultButton(QMessageBox::Yes);
-        mb.setDetailedText(QJsonDocument(buildReport()).toJson(QJsonDocument::Indented));
-        s->setValue(CFG_TELEMETRY, mb.exec() == QMessageBox::Yes);
+        // mb.setDefaultButton(QMessageBox::Yes);
+        // mb.setDetailedText(QJsonDocument(buildReport()).toJson(QJsonDocument::Indented));
+        // s->setValue(CFG_TELEMETRY, mb.exec() == QMessageBox::Yes);
+
+        // 기본값을 비활성화로 설정
+        s->setValue(CFG_TELEMETRY, false);
     }
 
     enable(s->value(CFG_TELEMETRY).toBool());
