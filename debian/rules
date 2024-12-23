@@ -2,13 +2,34 @@
 CODENAME = $(shell lsb_release -cs)
 export DH_VERBOSE = 1
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
-#export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic
-#export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
 export QT_SELECT=6
 
+# i18n 및 plugins 디렉토리 경로 설정
+export I18N_DIR = /usr/share/qt6/translations
+export PLUGINS_DIR = /usr/lib/albert/plugins
+
+# Qt6 도구 전체 경로 설정
+LRELEASE = /usr/lib/qt6/bin/lrelease
 
 %:
 	dh $@
 
 override_dh_auto_configure:
-	dh_auto_configure -- -DCMAKE_BUILD_TYPE=Release -DBUILD_TEMPLATE=OFF -DBUILD_DEBUG=OFF -Wno-inline 
+	dh_auto_configure -- \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DBUILD_DEBUG=OFF \
+		-DBUILD_TESTS=OFF \
+		-DQT_DEFAULT_MAJOR_VERSION=6 \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-Wno-dev
+
+# 번역 파일과 플러그인 설치
+override_dh_install:
+	dh_install
+	# 번역 파일 컴파일 및 설치
+	mkdir -p debian/albert/$(I18N_DIR)
+	cd i18n && \
+	for ts in *.ts; do \
+		$(LRELEASE) $$ts -qm ../debian/albert/$(I18N_DIR)/$${ts%.ts}.qm; \
+	done
