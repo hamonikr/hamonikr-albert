@@ -1,3 +1,18 @@
+albert (0.24.2+hamonikr10) paektu; urgency=medium
+
+  [Kevin Kim]
+  * Add Kakao Map search engine
+
+ -- HamoniKR <pkg@hamonikr.org>  Mon, 23 Dec 2024 11:28:55 +0900
+
+albert (0.24.2+hamonikr9) paektu; urgency=medium
+
+  [Kevin Kim]
+  * Add Coupang search engine
+  * Enable telemetry
+
+ -- HamoniKR <pkg@hamonikr.org>  Mon, 23 Dec 2024 10:59:38 +0900
+
 albert (0.24.2+hamonikr8) paektu; urgency=medium
 
   [Kevin Kim]

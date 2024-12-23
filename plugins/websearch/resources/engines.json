@@ -64,5 +64,17 @@
         "name": "Naver",
         "trigger": "nv",
         "url": "https://search.naver.com/search.naver?&query=%s"
-    }    
+    },
+    {
+        "iconPath": ":coupang",
+        "name": "Coupang",
+        "trigger": "cp",
+        "url": "https://www.coupang.com/np/search?q=%s"
+    },
+    {
+        "iconPath": ":kakaomap",
+        "name": "Kakao Map",
+        "trigger": "km",
+        "url": "https://map.kakao.com/?q=%s"
+    }
 ]

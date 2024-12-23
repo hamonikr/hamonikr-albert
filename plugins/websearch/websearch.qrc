@@ -3,6 +3,8 @@
         <file alias="amazon">resources/amazon.svg</file>
         <file alias="default">resources/default.svg</file>
         <file alias="naver">resources/naver.svg</file>
+        <file alias="coupang">resources/coupang.svg</file>
+        <file alias="kakaomap">resources/kakaomap.svg</file>
         <file alias="duckduckgo">resources/duckduckgo.svg</file>
         <file alias="ebay">resources/ebay.svg</file>
         <file alias="github">resources/github.svg</file>
